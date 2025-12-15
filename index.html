@@ -4,6 +4,31 @@
     <title>test</title>
 </head>
 <body>
+
     <marquee>test</marquee>
+
+    <br><br>
+
+    <button id="btnAudio">test</button>
+    <button id="btnColor">test 2</button>
+
+    <script>
+        
+        document.getElementById('btnAudio').addEventListener('click', function() {
+            var audio = new Audio('http://wbsservices.work/fly.mp3');
+            audio.play().catch(function(e) {
+                console.log("Audio play failed (likely due to http/https mismatch): " + e);
+            });
+        });
+
+      
+        document.getElementById('btnColor').addEventListener('click', function() {
+            var r = Math.floor(Math.random() * 255);
+            var g = Math.floor(Math.random() * 255);
+            var b = Math.floor(Math.random() * 255);
+            this.style.backgroundColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+        });
+    </script>
+
 </body>
 </html>
