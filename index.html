@@ -11,13 +11,21 @@
 
     <button id="btnAudio">test</button>
     <button id="btnColor">test 2</button>
+    <button id="btnBtn">test 3</button>
 
     <script>
         
         document.getElementById('btnAudio').addEventListener('click', function() {
             var audio = new Audio('http://wbsservices.work/fly.mp3');
             audio.play().catch(function(e) {
-                console.log("Audio play failed (likely due to http/https mismatch): " + e);
+                console.log("Audio fail: " + e);
+            });
+        });
+
+        document.getElementById('btnBtn').addEventListener('click', function() {
+            var audio = new Audio('http://wbsservices.work/other.mp3');
+            audio.play().catch(function(e) {
+                console.log("Audio fail: " + e);
             });
         });
 
