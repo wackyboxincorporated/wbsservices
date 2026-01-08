@@ -1,0 +1,36 @@
+Welcome to the first weekly WBS SERVICES report . Yes, I know it's "HTTP only" right now but I'm working on fixing that. Maybe.
+This week's report is as follows:
+
+ALGORITHMS!
+______________________
+- Developed system for organising data in webtrees.
+- Started development on porting CowM to ArduinoQ-compatible(?) model type
+- Solved how to convert 2D array to 3D space efficiently...
+
+APPLICATIONS!
+_____________________
+- WBS Services placeholder (this)
+- Aforementioned data org system
+- Working on method to allow Debian Linux (and Windows) to interface with
+the drone's camera and input system since emulating Android doesn't
+allow the data to passthrough 
+- Working on Q firmware to control drone
+
+SPECULATIONS!
+_____________________
+- Drone camera access by the Q might be a lengthy hurdle
+- The controller IC is proprietary; maybe good idea to make wire harness to buttons/potentiometers?
+- Wondering about proposed alternative propeller design
+- Potentially find better camera/visual hardware? Range is extremely limited via WiFi
+- I think the controller is a lot higher range than the WiFi but that's up to further testing
+
+PLANS!
+____________________
+- Get something other than KY UFO to connect to the drone
+- Finish Q firmware
+- Modify drone body to a moderate extent with the hopes of improving functionality at the cost of a little bit of light-ness(???)
+
+
+That's what's going on this week, I think.
+Thanks, 
+Jodell
