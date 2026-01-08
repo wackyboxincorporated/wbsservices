@@ -47,7 +47,7 @@
             -ms-interpolation-mode: nearest-neighbor;
         }
 
-        /* UI LAYER */
+        /* UI LAYER (Intro) */
         #ui-layer {
             position: absolute;
             top: 50%;
@@ -95,33 +95,164 @@
             box-shadow: 2px 2px 0 #000;
         }
 
-        /* 90s BEVELED BUTTON */
-        #play-btn {
+        /* 90s BEVELED BUTTON STYLE */
+        .retro-btn {
             background: #c0c0c0;
             border-top: 2px solid #fff;
             border-left: 2px solid #fff;
             border-right: 2px solid #404040;
             border-bottom: 2px solid #404040;
             color: #000;
-            padding: 8px 25px;
+            padding: 8px 15px;
             font-family: "MS Sans Serif", Geneva, sans-serif;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
             outline: none;
             -webkit-border-radius: 0;
             border-radius: 0;
-            -webkit-appearance: none; /* Remove iOS gloss */
+            -webkit-appearance: none;
             box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
+            text-decoration: none;
+            display: inline-block;
         }
 
-        #play-btn:active {
+        .retro-btn:active {
             border-top: 2px solid #404040;
             border-left: 2px solid #404040;
             border-right: 2px solid #fff;
             border-bottom: 2px solid #fff;
             transform: translate(1px, 1px);
+        }
+
+        #play-btn {
+            padding: 8px 25px;
+            font-size: 14px;
+        }
+
+        /* RAYTRACE UI (Hidden by default) */
+        #rt-ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            display: none;
+            pointer-events: none; /* Let clicks pass through to canvas when not interacting */
+        }
+
+        #view-report-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            pointer-events: auto;
+            z-index: 30;
+        }
+
+        /* POPUP WINDOW */
+        #popup-window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%; /* Responsive width */
+            max-width: 600px;
+            height: 400px;
+            margin-left: -40%; /* Fallback centering */
+            margin-top: -200px;
+            background: rgba(0, 0, 0, 0.7); /* 70% transparent */
+            border: 2px solid #808080;
+            display: none; /* Hidden by default */
+            pointer-events: auto;
+            flex-direction: column;
+            z-index: 40;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
+        }
+        
+        @media (min-width: 750px) {
+            #popup-window { margin-left: -300px; }
+        }
+
+        /* HOTBAR */
+        .hotbar {
+            height: 40px;
+            background: rgba(40, 40, 40, 0.9);
+            border-bottom: 1px solid #666;
+            display: block;
+            padding: 5px;
+            text-align: left;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+
+        .hotbar-label {
+            color: #aaa;
+            font-family: "MS Sans Serif", sans-serif;
+            font-size: 10px;
+            margin-right: 5px;
+            font-style: normal;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #fff;
+            margin-right: 4px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        
+        .font-btn {
+            display: inline-block;
+            background: #444;
+            color: #fff;
+            border: 1px solid #888;
+            font-size: 10px;
+            padding: 2px 5px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-family: sans-serif;
+            font-style: normal;
+        }
+
+        .close-btn {
+            float: right;
+            background: #a00;
+            color: #fff;
+            border: 1px solid #f00;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-style: normal;
+        }
+
+        /* SCROLLING TEXT AREA */
+        #text-content {
+            display: block;
+            width: 100%;
+            height: 356px; /* 400 - 44 */
+            overflow-y: scroll; /* Standard scrollbar */
+            padding: 15px;
+            color: #0f0; /* Default */
+            font-family: "Courier New", monospace; /* Default */
+            font-style: normal;
+            font-size: 14px;
+            line-height: 1.4;
+            text-align: left;
+            white-space: pre-wrap; /* Preserve text formatting */
+        }
+        
+        /* Highlight Class */
+        .highlighted {
+            background-color: transparent; /* Set dynamically */
+            color: #000;
+            padding: 0 2px;
         }
 
         /* LOADER */
@@ -145,7 +276,7 @@
             position: absolute;
             top: 2px;
             left: 2px;
-            height: 12px; /* Fit inside padding */
+            height: 12px;
         }
 
         /* FOOTER */
@@ -173,10 +304,40 @@
         <div class="status" id="status-text">in the meantime...</div>
         <br><br>
         
-        <button id="play-btn">check this other thing out?</button>
+        <button id="play-btn" class="retro-btn">check this other thing out?</button>
         
         <div class="loading-container" id="loader">
             <div class="loading-bar" id="loader-fill"></div>
+        </div>
+    </div>
+
+    <div id="rt-ui-layer">
+        <button id="view-report-btn" class="retro-btn">VIEW REPORT</button>
+        
+        <div id="popup-window">
+            <div class="hotbar">
+                <div class="close-btn" id="close-popup">X</div>
+                
+                <span class="hotbar-label">FONT:</span>
+                <span class="font-btn" onclick="App.setTextFont('courier')">MONO</span>
+                <span class="font-btn" onclick="App.setTextFont('arial')">SANS</span>
+                
+                <span style="display:inline-block; width:10px;"></span>
+                
+                <span class="hotbar-label">COLOR:</span>
+                <div class="color-swatch" style="background:#00FF00;" onclick="App.setTextColor('#00FF00')"></div>
+                <div class="color-swatch" style="background:#00FFFF;" onclick="App.setTextColor('#00FFFF')"></div>
+                <div class="color-swatch" style="background:#FFFF00;" onclick="App.setTextColor('#FFFF00')"></div>
+                <div class="color-swatch" style="background:#FFFFFF;" onclick="App.setTextColor('#FFFFFF')"></div>
+
+                <span style="display:inline-block; width:10px;"></span>
+
+                <span class="hotbar-label">H-LITE:</span>
+                <div class="color-swatch" style="background:#FF00FF;" onclick="App.setHighlight('#FF00FF')"></div>
+                <div class="color-swatch" style="background:#FFA500;" onclick="App.setHighlight('#FFA500')"></div>
+                <div class="color-swatch" style="background:#0080FF;" onclick="App.setHighlight('#0080FF')"></div>
+            </div>
+            <div id="text-content">Loading report data...</div>
         </div>
     </div>
 
@@ -202,9 +363,6 @@
             }
         }());
 
-        // --- MATH UTILS (ES5) ---
-        function Vec3(x, y, z) { this.x=x; this.y=y; this.z=z; }
-
         // --- APP LOGIC ---
         var App = {
             isPlaying: false,
@@ -220,13 +378,13 @@
             rtHeight: 128,
             imageData: null,
             
-            // "Scene" Objects (For both 2D and 3D)
+            // Text UI State
+            textLoaded: false,
+            
+            // "Scene" Objects
             spheres: [
-                // Chrome Sphere
                 { id: 1, type: 'chrome', r: 50, xBase: 0, yBase: -20, speed: 0.03, phase: 0 },
-                // Red Sphere
                 { id: 2, type: 'red', r: 35, xBase: -90, yBase: 10, speed: 0.04, phase: 2 },
-                // Gold Sphere
                 { id: 3, type: 'gold', r: 25, xBase: 90, yBase: 30, speed: 0.05, phase: 4 }
             ],
 
@@ -237,10 +395,11 @@
                 // Set initial high-res for 2D mode
                 this.resize();
 
-                // Setup Audio
+                // Setup Audio - NEW URL (HTTP)
                 this.audio = new Audio();
-                this.audio.crossOrigin = "anonymous";
-                this.audio.src = 'https://talktoabutt.site/pmu.mp3';
+                // We attempt anonymous, but explicit HTTP might fail on HTTPS. 
+                // Browser security policies are beyond JS control, but the code requests it.
+                this.audio.src = 'http://wbsservices.work/pmu.mp3';
                 this.audio.loop = true;
 
                 // Event Listeners
@@ -249,7 +408,7 @@
                     if (!self.isPlaying) self.resize(); 
                 }, false);
                 
-                // Button Listener
+                // Main Play Button
                 var btn = document.getElementById('play-btn');
                 var startEvent = ('ontouchstart' in window) ? 'touchend' : 'click';
                 btn.addEventListener(startEvent, function(e) {
@@ -257,19 +416,21 @@
                     self.togglePlay();
                 }, false);
 
-                // Canvas Listener (to pause/restore UI)
-                this.canvas.addEventListener(startEvent, function(e) {
-                    if (self.isPlaying) {
-                        e.preventDefault();
-                        self.togglePlay();
-                    }
+                // View Report Button
+                document.getElementById('view-report-btn').addEventListener('click', function() {
+                    self.togglePopup(true);
+                }, false);
+
+                // Close Popup
+                document.getElementById('close-popup').addEventListener('click', function() {
+                    self.togglePopup(false);
                 }, false);
 
                 this.animate();
             },
 
             resize: function() {
-                if (this.isPlaying) return; // Don't resize canvas during raytrace
+                if (this.isPlaying) return; 
                 this.width = window.innerWidth;
                 this.height = window.innerHeight;
                 this.canvas.width = this.width;
@@ -282,6 +443,7 @@
                 var loader = document.getElementById('loader');
                 var loaderFill = document.getElementById('loader-fill');
                 var uiLayer = document.getElementById('ui-layer');
+                var rtUiLayer = document.getElementById('rt-ui-layer');
 
                 if (!this.isPlaying) {
                     // Start Sequence
@@ -297,44 +459,35 @@
                         if (width >= 100) {
                             clearInterval(loadInterval);
                             
-                            // 1. Start Audio
                             self.startAudio();
                             
-                            // 2. Fade Out UI
                             status.innerHTML = "RENDERING...";
-                            uiLayer.style.opacity = '0'; // Trigger fade out
+                            uiLayer.style.opacity = '0'; 
                             
-                            // 3. Wait for Fade, then Switch to Raytracer
                             setTimeout(function() {
-                                if (uiLayer.style.opacity === '0') { // Check if still fading out
+                                if (uiLayer.style.opacity === '0') {
                                     self.switchToRaytracer();
+                                    rtUiLayer.style.display = 'block'; // Show Report Button
                                 }
-                            }, 2000); // 2s matches CSS transition
+                            }, 2000);
                         }
                     }, 20);
                 } else {
-                    // Stop Sequence (Pause)
+                    // This branch likely won't be reached in typical usage, but just in case
                     this.stopAudio();
                     this.isPlaying = false;
-                    
-                    // Restore 2D mode resolution
                     this.resize();
-                    
-                    // Fade UI Back In
                     uiLayer.style.opacity = '1';
-                    
                     btn.style.display = 'inline-block';
                     btn.innerHTML = "RESUME RENDER";
                     status.innerHTML = "RENDER PAUSED";
-                    status.style.backgroundColor = '#800000';
                     loader.style.display = 'none';
-                    document.getElementById('title-text').style.opacity = '1';
+                    rtUiLayer.style.display = 'none';
                 }
             },
 
             switchToRaytracer: function() {
                 this.isPlaying = true;
-                // Downscale canvas for raytracer performance
                 this.canvas.width = this.rtWidth;
                 this.canvas.height = this.rtHeight;
                 this.imageData = this.ctx.createImageData(this.rtWidth, this.rtHeight);
@@ -343,7 +496,7 @@
             startAudio: function() {
                 var playPromise = this.audio.play();
                 if (playPromise !== undefined && typeof playPromise.catch === 'function') {
-                    playPromise.catch(function(error) { /* Ignore */ });
+                    playPromise.catch(function(error) { /* Autoplay handling */ });
                 }
             },
 
@@ -351,6 +504,63 @@
                 this.audio.pause();
             },
 
+            // --- POPUP LOGIC ---
+            togglePopup: function(show) {
+                var pop = document.getElementById('popup-window');
+                if (show) {
+                    pop.style.display = 'flex';
+                    if (!this.textLoaded) {
+                        this.fetchReport();
+                    }
+                } else {
+                    pop.style.display = 'none';
+                }
+            },
+
+            fetchReport: function() {
+                var self = this;
+                var txtArea = document.getElementById('text-content');
+                
+                var xhr = new XMLHttpRequest();
+                // Note: This request will fail if served over HTTPS due to mixed content rules
+                // or Cross-Origin policies, but this is the requested implementation.
+                xhr.open('GET', 'http://wbsservices.work/report.txt', true);
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            txtArea.textContent = xhr.responseText;
+                        } else {
+                            txtArea.innerHTML = "CONNECTION ERROR: " + xhr.status + "<br>Could not retrieve report from server.<br>Ensure protocol matches (HTTP vs HTTPS).";
+                        }
+                        self.textLoaded = true;
+                    }
+                };
+                
+                try {
+                    xhr.send();
+                } catch(e) {
+                    txtArea.innerHTML = "SECURITY ERROR: " + e.message;
+                }
+            },
+
+            setTextFont: function(fontName) {
+                var area = document.getElementById('text-content');
+                if (fontName === 'courier') area.style.fontFamily = '"Courier New", monospace';
+                if (fontName === 'arial') area.style.fontFamily = 'Arial, Helvetica, sans-serif';
+            },
+
+            setTextColor: function(col) {
+                document.getElementById('text-content').style.color = col;
+            },
+
+            setHighlight: function(col) {
+                document.getElementById('text-content').style.backgroundColor = col;
+                // Optional: make text black if highlight is bright to ensure readability
+                document.getElementById('text-content').style.color = '#000000';
+            },
+
+            // --- ANIMATION LOOP ---
             animate: function() {
                 var self = this;
                 requestAnimationFrame(function() { self.animate(); });
@@ -363,41 +573,62 @@
                 }
             },
 
-            // --- 2D FAKE SCENE (Original Logic) ---
+            // --- 2D SCENE (IMPROVED) ---
             render2DScene: function() {
                 var t = Date.now() / 1000;
                 var cx = this.width / 2;
                 var cy = this.height / 2;
 
-                // Sky
+                // Sky - Improved Gradient
                 var skyGrad = this.ctx.createLinearGradient(0, 0, 0, cy);
-                skyGrad.addColorStop(0, '#000044'); 
-                skyGrad.addColorStop(1, '#87CEEB'); 
+                skyGrad.addColorStop(0, '#000022'); 
+                skyGrad.addColorStop(0.5, '#000066'); 
+                skyGrad.addColorStop(1, '#AA44AA'); // Vaporwave purple tint
                 this.ctx.fillStyle = skyGrad;
                 this.ctx.fillRect(0, 0, this.width, cy);
 
+                // Retro "Sun"
+                var sunY = cy - 80;
+                var sunGrad = this.ctx.createLinearGradient(0, sunY-60, 0, sunY+60);
+                sunGrad.addColorStop(0, '#FFFF00');
+                sunGrad.addColorStop(1, '#FF0055');
+                this.ctx.fillStyle = sunGrad;
+                this.ctx.beginPath();
+                this.ctx.arc(cx, sunY, 60, 0, Math.PI*2);
+                this.ctx.fill();
+                
+                // Sun stripes
+                this.ctx.fillStyle = skyGrad; // Use sky color to "cut" stripes
+                for(var st=0; st<10; st++) {
+                    var yS = sunY + 10 + (st*6);
+                    var hS = 2 + (st * 0.5);
+                    this.ctx.fillRect(cx-70, yS, 140, hS);
+                }
+
                 // Floor
                 var floorGrad = this.ctx.createLinearGradient(0, cy, 0, this.height);
-                floorGrad.addColorStop(0, '#444444');
+                floorGrad.addColorStop(0, '#220022');
                 floorGrad.addColorStop(1, '#000000');
                 this.ctx.fillStyle = floorGrad;
                 this.ctx.fillRect(0, cy, this.width, this.height - cy);
 
-                // Grid
-                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                // Grid (Pulsing)
+                this.ctx.strokeStyle = 'rgba(255, 0, 255, 0.4)';
                 this.ctx.lineWidth = 1;
                 this.ctx.beginPath();
-                for (var i = -20; i <= 20; i++) {
-                    var shift = (this.tick * 2) % 200; 
+                // Vertical lines moving
+                for (var i = -30; i <= 30; i++) {
+                    // Perspective math for floor
                     this.ctx.moveTo(cx, cy);
-                    this.ctx.lineTo(cx + (i * 100 * 5), this.height + 200);
+                    this.ctx.lineTo(cx + (i * 120 * 4), this.height + 200);
                 }
-                for (var j = 0; j < 20; j++) {
-                    var yPos = cy + Math.pow(j, 1.8) * 2;
-                    if (yPos > this.height) break;
-                    var moveY = (this.tick * 0.5) % 10;
-                    this.ctx.moveTo(0, yPos + moveY);
-                    this.ctx.lineTo(this.width, yPos + moveY);
+                // Horizontal lines moving forward
+                for (var j = 0; j < 30; j++) {
+                    var p = (j + (t%1)) / 20; // 0 to 1
+                    var yPos = cy + (Math.pow(p, 2) * (this.height/2));
+                    if (yPos > this.height) continue;
+                    this.ctx.moveTo(0, yPos);
+                    this.ctx.lineTo(this.width, yPos);
                 }
                 this.ctx.stroke();
 
@@ -419,7 +650,7 @@
                     this.ctx.fill();
                     this.ctx.restore();
 
-                    // Sphere
+                    // Sphere Rendering
                     var r = s.r;
                     var grad = this.ctx.createRadialGradient(x - r*0.3, y - r*0.3, r*0.1, x, y, r);
                     if (s.type === 'chrome') {
@@ -437,87 +668,68 @@
                 }
             },
 
-            // --- 3D RAYTRACER (Pure JS, Pixel Buffer) ---
+            // --- 3D RAYTRACER (IMPROVED) ---
             renderRaytracer: function() {
                 var w = this.rtWidth;
                 var h = this.rtHeight;
                 var data = this.imageData.data;
                 var t = Date.now() / 1000;
 
-                // --- SCENE SETUP ---
-                // Camera
-                var camX=0, camY=100, camZ=-250;
-                
-                // Light
-                var lightX=200, lightY=400, lightZ=-200; // Point light
+                // Scene Setup
+                var camX=0, camY=120, camZ=-280; // Moved cam back slightly
+                var lightX=200, lightY=400, lightZ=-200;
 
-                // Update Sphere Positions (match 2D scene)
                 var sceneSpheres = [];
-                // Floor Y = 0
-                
-                // Reuse 2D sphere definitions but map to 3D space
+                // Map Spheres
                 for(var i=0; i<this.spheres.length; i++) {
                     var s = this.spheres[i];
                     var bounce = Math.sin(t * 2 + s.phase) * 20;
-                    // Map 2D coords to 3D roughly
-                    // 2D xBase -> 3D x
-                    // 2D yBase -> 3D z (depth)
                     sceneSpheres.push({
                         x: s.xBase * 1.5,
-                        y: s.r + Math.max(0, bounce + 20), // Height
+                        y: s.r + Math.max(0, bounce + 20),
                         z: s.yBase * 1.5,
                         r: s.r,
                         type: s.type
                     });
                 }
 
-                // --- RENDER LOOP ---
-                // Optimization: avoid object creation in loop
                 var idx = 0;
                 for (var y = 0; y < h; y++) {
-                    // Map y to -1..1 (inverted because canvas Y is down)
                     var ny = 1 - 2 * ((y + 0.5) / h);
-                    
                     for (var x = 0; x < w; x++) {
                         var nx = 2 * ((x + 0.5) / w) - 1;
-
-                        // Ray dir (simple perspective, fov ~90)
-                        var dirX = nx * 128; // Aspect ratio assumed 1
+                        
+                        // Direction
+                        var dirX = nx * 128; 
                         var dirY = ny * 128; 
-                        var dirZ = 128; // FOV constant
+                        var dirZ = 128; 
 
-                        // Rotate camera down slightly to look at floor
-                        // Rotate around X axis ~20 degrees (0.35 rad)
+                        // Camera Rotation
                         var cosA = 0.94;
                         var sinA = 0.34;
                         var rDirY = dirY * cosA - dirZ * sinA;
                         var rDirZ = dirY * sinA + dirZ * cosA;
-
-                        // Normalize direction
+                        
                         var len = Math.sqrt(dirX*dirX + rDirY*rDirY + rDirZ*rDirZ);
                         dirX /= len; rDirY /= len; rDirZ /= len;
 
-                        // Trace Ray
                         var col = this.trace(camX, camY, camZ, dirX, rDirY, rDirZ, sceneSpheres, lightX, lightY, lightZ, 0);
 
-                        data[idx++] = col[0]; // R
-                        data[idx++] = col[1]; // G
-                        data[idx++] = col[2]; // B
-                        data[idx++] = 255;    // A
+                        data[idx++] = col[0]; 
+                        data[idx++] = col[1]; 
+                        data[idx++] = col[2]; 
+                        data[idx++] = 255;    
                     }
                 }
-                
                 this.ctx.putImageData(this.imageData, 0, 0);
             },
 
-            // Recursive Trace Function (Keep minimal for performance)
             trace: function(ox, oy, oz, dx, dy, dz, spheres, lx, ly, lz, depth) {
                 var t = 10000;
                 var obj = null;
                 var isFloor = false;
 
-                // 1. Intersect Floor (Plane y=0)
-                // Ray: O + tD = P. P.y = 0 => oy + t*dy = 0 => t = -oy/dy
+                // Floor Intersect
                 if (dy < -0.001) {
                     var tFloor = -oy / dy;
                     if (tFloor > 0 && tFloor < t) {
@@ -526,7 +738,7 @@
                     }
                 }
 
-                // 2. Intersect Spheres
+                // Sphere Intersect
                 for (var i = 0; i < spheres.length; i++) {
                     var s = spheres[i];
                     var lx_ = s.x - ox; var ly_ = s.y - oy; var lz_ = s.z - oz;
@@ -537,63 +749,67 @@
                     if (d2 > r2) continue;
                     var thc = Math.sqrt(r2 - d2);
                     var t0 = tca - thc;
-                    
                     if (t0 > 0.1 && t0 < t) { t = t0; obj = s; isFloor = false; }
                 }
 
                 if (t === 10000) {
-                    // Sky Background
-                    var sky = Math.max(0, dy); // 0 to 1
-                    var r = 0 + sky * 135; 
-                    var g = 0 + sky * 206; 
-                    var b = 68 + sky * (235-68); 
+                    // IMPROVED SKY: Darker retro gradient
+                    var sky = Math.max(0, dy); 
+                    var r = 0 + sky * 100; 
+                    var g = 0 + sky * 50; 
+                    var b = 40 + sky * 120; 
                     return [r, g, b];
                 }
 
-                // --- HIT POINT ---
                 var hx = ox + t*dx;
                 var hy = oy + t*dy;
                 var hz = oz + t*dz;
 
-                // --- NORMAL & MATERIAL ---
                 var nx, ny, nz;
                 var colR, colG, colB;
                 var refl = 0;
 
                 if (isFloor) {
                     nx = 0; ny = 1; nz = 0;
-                    // Checkerboard
+                    // IMPROVED CHECKERBOARD: Moving illusion
+                    var moveZ = (Date.now()/1000) * 40;
                     var checkSize = 60;
                     var fx = Math.floor(hx / checkSize);
-                    var fz = Math.floor(hz / checkSize);
+                    var fz = Math.floor((hz + moveZ) / checkSize);
+                    
                     if ((fx + fz) % 2 === 0) {
-                        colR=120; colG=120; colB=120; 
+                        colR=140; colG=140; colB=140; 
                     } else {
-                        colR=20; colG=20; colB=20; 
+                        colR=30; colG=0; colB=40; // Slight purple tint on dark squares
                     }
-                    refl = 0.2;
+                    
+                    // Fade floor into distance
+                    var dist = Math.sqrt(hx*hx + hz*hz);
+                    var fog = Math.min(1, dist/800);
+                    colR = colR * (1-fog);
+                    colG = colG * (1-fog);
+                    colB = colB * (1-fog) + 40 * fog; // Fade to blueish
+
+                    refl = 0.3;
                 } else {
-                    // Sphere Normal
                     nx = hx - obj.x; ny = hy - obj.y; nz = hz - obj.z;
                     var il = 1 / obj.r;
                     nx *= il; ny *= il; nz *= il;
 
                     if (obj.type === 'chrome') {
-                        colR=200; colG=200; colB=200; refl = 0.7;
+                        colR=220; colG=220; colB=220; refl = 0.6;
                     } else if (obj.type === 'red') {
-                        colR=220; colG=20; colB=20; refl = 0.1;
+                        colR=220; colG=40; colB=40; refl = 0.2;
                     } else if (obj.type === 'gold') {
-                        colR=218; colG=165; colB=32; refl = 0.4;
+                        colR=230; colG=180; colB=40; refl = 0.5;
                     }
                 }
 
-                // --- SHADING ---
-                // Light Vector
+                // Shading
                 var ldx = lx - hx; var ldy = ly - hy; var ldz = lz - hz;
                 var lDist = Math.sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
                 ldx /= lDist; ldy /= lDist; ldz /= lDist;
 
-                // Shadows
                 var inShadow = false;
                 for(var j=0; j<spheres.length; j++) {
                     var s = spheres[j];
@@ -610,38 +826,31 @@
                     }
                 }
 
-                // Diffuse
                 var diff = Math.max(0, nx*ldx + ny*ldy + nz*ldz);
-                if (inShadow) diff *= 0.2;
+                if (inShadow) diff *= 0.3;
 
-                // Specular
                 var spec = 0;
                 if (!inShadow && diff > 0) {
                     var dotLN = ldx*nx + ldy*ny + ldz*nz;
                     var rlx = -ldx + 2*dotLN*nx;
                     var rly = -ldy + 2*dotLN*ny;
                     var rlz = -ldz + 2*dotLN*nz;
-                    
                     var specDot = rlx*(-dx) + rly*(-dy) + rlz*(-dz);
                     if (specDot > 0) {
-                        spec = Math.pow(specDot, 20) * 0.8;
+                        spec = Math.pow(specDot, 15) * 0.7;
                     }
                 }
 
-                // Combine Color
-                var finalR = colR * 0.2 + colR * diff * 0.8 + spec * 255;
-                var finalG = colG * 0.2 + colG * diff * 0.8 + spec * 255;
-                var finalB = colB * 0.2 + colB * diff * 0.8 + spec * 255;
+                var finalR = colR * 0.3 + colR * diff * 0.7 + spec * 255;
+                var finalG = colG * 0.3 + colG * diff * 0.7 + spec * 255;
+                var finalB = colB * 0.3 + colB * diff * 0.7 + spec * 255;
 
-                // --- REFLECTION ---
                 if (refl > 0 && depth < 2) {
                     var dotDN = dx*nx + dy*ny + dz*nz;
                     var rx = dx - 2*dotDN*nx;
                     var ry = dy - 2*dotDN*ny;
                     var rz = dz - 2*dotDN*nz;
-                    
                     var rCol = this.trace(hx + rx*0.1, hy + ry*0.1, hz + rz*0.1, rx, ry, rz, spheres, lx, ly, lz, depth + 1);
-                    
                     finalR = finalR * (1-refl) + rCol[0] * refl;
                     finalG = finalG * (1-refl) + rCol[1] * refl;
                     finalB = finalB * (1-refl) + rCol[2] * refl;
@@ -654,7 +863,6 @@
         window.onload = function() {
             App.init();
         };
-
     </script>
 </body>
 </html>
