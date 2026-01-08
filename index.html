@@ -1,6 +1,660 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    mfuing plcehlfder
-    <title>oueeee</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>placeholder</title>
+    <style>
+        /* RESET & BASE */
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            /* 90s Serif aesthetic */
+            font-family: "Times New Roman", Times, serif;
+            font-style: italic;
+        }
+
+        /* CANVAS LAYER */
+        #canvas-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: #000;
+            
+            /* CRITICAL FOR RETRO LOOK: Nearest Neighbor Scaling */
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        /* UI LAYER */
+        #ui-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 320px;
+            height: 240px;
+            margin-top: -120px;
+            margin-left: -160px;
+            z-index: 10;
+            text-align: center;
+            color: #d4d4d4;
+            
+            /* FADE TRANSITION */
+            -webkit-transition: opacity 2.0s ease-in-out;
+            -moz-transition: opacity 2.0s ease-in-out;
+            transition: opacity 2.0s ease-in-out;
+            opacity: 1;
+        }
+
+        h1 {
+            font-size: 32px;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            color: #d4d4d4;
+            text-shadow: 2px 2px 0px #000;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #808080;
+            margin-bottom: 25px;
+            font-family: "Courier New", monospace;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #ffff00;
+            margin-bottom: 15px;
+            background-color: #000080; /* Classic DOS/Windows blue */
+            display: inline-block;
+            padding: 2px 5px;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        /* 90s BEVELED BUTTON */
+        #play-btn {
+            background: #c0c0c0;
+            border-top: 2px solid #fff;
+            border-left: 2px solid #fff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+            color: #000;
+            padding: 8px 25px;
+            font-family: "MS Sans Serif", Geneva, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            outline: none;
+            -webkit-border-radius: 0;
+            border-radius: 0;
+            -webkit-appearance: none; /* Remove iOS gloss */
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
+        }
+
+        #play-btn:active {
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            transform: translate(1px, 1px);
+        }
+
+        /* LOADER */
+        .loading-container {
+            width: 200px;
+            height: 20px;
+            background: #808080;
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            margin: 20px auto;
+            position: relative;
+            display: none;
+            padding: 2px;
+        }
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: #000080;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            height: 12px; /* Fit inside padding */
+        }
+
+        /* FOOTER */
+        .footer {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            text-align: right;
+            color: #666;
+            font-family: "Courier New", monospace;
+            font-size: 10px;
+            z-index: 10;
+            text-shadow: 1px 1px 0 #000;
+        }
+    </style>
 </head>
+<body>
+
+    <canvas id="canvas-layer"></canvas>
+
+    <div id="ui-layer">
+        <h1 id="title-text">placeholder</h1>
+        <div class="subtitle">wbs services is coming soon..</div>
+        
+        <div class="status" id="status-text">in the meantime...</div>
+        <br><br>
+        
+        <button id="play-btn">check this other thing out?</button>
+        
+        <div class="loading-container" id="loader">
+            <div class="loading-bar" id="loader-fill"></div>
+        </div>
+    </div>
+
+    <div class="footer">yes</div>
+
+    <script>
+        // --- COMPATIBILITY POLYFILLS FOR ANCIENT BROWSERS ---
+        (function() {
+            var lastTime = 0;
+            var vendors = ['webkit', 'moz'];
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+            }
+            if (!window.requestAnimationFrame) {
+                window.requestAnimationFrame = function(callback, element) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+            }
+        }());
+
+        // --- MATH UTILS (ES5) ---
+        function Vec3(x, y, z) { this.x=x; this.y=y; this.z=z; }
+
+        // --- APP LOGIC ---
+        var App = {
+            isPlaying: false,
+            audio: null,
+            canvas: null,
+            ctx: null,
+            width: 0,
+            height: 0,
+            tick: 0,
+            
+            // Raytracer Settings
+            rtWidth: 128,
+            rtHeight: 128,
+            imageData: null,
+            
+            // "Scene" Objects (For both 2D and 3D)
+            spheres: [
+                // Chrome Sphere
+                { id: 1, type: 'chrome', r: 50, xBase: 0, yBase: -20, speed: 0.03, phase: 0 },
+                // Red Sphere
+                { id: 2, type: 'red', r: 35, xBase: -90, yBase: 10, speed: 0.04, phase: 2 },
+                // Gold Sphere
+                { id: 3, type: 'gold', r: 25, xBase: 90, yBase: 30, speed: 0.05, phase: 4 }
+            ],
+
+            init: function() {
+                this.canvas = document.getElementById('canvas-layer');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // Set initial high-res for 2D mode
+                this.resize();
+
+                // Setup Audio
+                this.audio = new Audio();
+                this.audio.crossOrigin = "anonymous";
+                this.audio.src = 'https://talktoabutt.site/pmu.mp3';
+                this.audio.loop = true;
+
+                // Event Listeners
+                var self = this;
+                window.addEventListener('resize', function() { 
+                    if (!self.isPlaying) self.resize(); 
+                }, false);
+                
+                // Button Listener
+                var btn = document.getElementById('play-btn');
+                var startEvent = ('ontouchstart' in window) ? 'touchend' : 'click';
+                btn.addEventListener(startEvent, function(e) {
+                    e.preventDefault();
+                    self.togglePlay();
+                }, false);
+
+                // Canvas Listener (to pause/restore UI)
+                this.canvas.addEventListener(startEvent, function(e) {
+                    if (self.isPlaying) {
+                        e.preventDefault();
+                        self.togglePlay();
+                    }
+                }, false);
+
+                this.animate();
+            },
+
+            resize: function() {
+                if (this.isPlaying) return; // Don't resize canvas during raytrace
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+            },
+
+            togglePlay: function() {
+                var btn = document.getElementById('play-btn');
+                var status = document.getElementById('status-text');
+                var loader = document.getElementById('loader');
+                var loaderFill = document.getElementById('loader-fill');
+                var uiLayer = document.getElementById('ui-layer');
+
+                if (!this.isPlaying) {
+                    // Start Sequence
+                    status.innerHTML = "LOADING ASSETS...";
+                    btn.style.display = 'none';
+                    loader.style.display = 'block';
+
+                    var width = 0;
+                    var self = this;
+                    var loadInterval = setInterval(function() {
+                        width += 4;
+                        loaderFill.style.width = width + '%';
+                        if (width >= 100) {
+                            clearInterval(loadInterval);
+                            
+                            // 1. Start Audio
+                            self.startAudio();
+                            
+                            // 2. Fade Out UI
+                            status.innerHTML = "RENDERING...";
+                            uiLayer.style.opacity = '0'; // Trigger fade out
+                            
+                            // 3. Wait for Fade, then Switch to Raytracer
+                            setTimeout(function() {
+                                if (uiLayer.style.opacity === '0') { // Check if still fading out
+                                    self.switchToRaytracer();
+                                }
+                            }, 2000); // 2s matches CSS transition
+                        }
+                    }, 20);
+                } else {
+                    // Stop Sequence (Pause)
+                    this.stopAudio();
+                    this.isPlaying = false;
+                    
+                    // Restore 2D mode resolution
+                    this.resize();
+                    
+                    // Fade UI Back In
+                    uiLayer.style.opacity = '1';
+                    
+                    btn.style.display = 'inline-block';
+                    btn.innerHTML = "RESUME RENDER";
+                    status.innerHTML = "RENDER PAUSED";
+                    status.style.backgroundColor = '#800000';
+                    loader.style.display = 'none';
+                    document.getElementById('title-text').style.opacity = '1';
+                }
+            },
+
+            switchToRaytracer: function() {
+                this.isPlaying = true;
+                // Downscale canvas for raytracer performance
+                this.canvas.width = this.rtWidth;
+                this.canvas.height = this.rtHeight;
+                this.imageData = this.ctx.createImageData(this.rtWidth, this.rtHeight);
+            },
+
+            startAudio: function() {
+                var playPromise = this.audio.play();
+                if (playPromise !== undefined && typeof playPromise.catch === 'function') {
+                    playPromise.catch(function(error) { /* Ignore */ });
+                }
+            },
+
+            stopAudio: function() {
+                this.audio.pause();
+            },
+
+            animate: function() {
+                var self = this;
+                requestAnimationFrame(function() { self.animate(); });
+                this.tick++;
+
+                if (this.isPlaying) {
+                    this.renderRaytracer();
+                } else {
+                    this.render2DScene();
+                }
+            },
+
+            // --- 2D FAKE SCENE (Original Logic) ---
+            render2DScene: function() {
+                var t = Date.now() / 1000;
+                var cx = this.width / 2;
+                var cy = this.height / 2;
+
+                // Sky
+                var skyGrad = this.ctx.createLinearGradient(0, 0, 0, cy);
+                skyGrad.addColorStop(0, '#000044'); 
+                skyGrad.addColorStop(1, '#87CEEB'); 
+                this.ctx.fillStyle = skyGrad;
+                this.ctx.fillRect(0, 0, this.width, cy);
+
+                // Floor
+                var floorGrad = this.ctx.createLinearGradient(0, cy, 0, this.height);
+                floorGrad.addColorStop(0, '#444444');
+                floorGrad.addColorStop(1, '#000000');
+                this.ctx.fillStyle = floorGrad;
+                this.ctx.fillRect(0, cy, this.width, this.height - cy);
+
+                // Grid
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                for (var i = -20; i <= 20; i++) {
+                    var shift = (this.tick * 2) % 200; 
+                    this.ctx.moveTo(cx, cy);
+                    this.ctx.lineTo(cx + (i * 100 * 5), this.height + 200);
+                }
+                for (var j = 0; j < 20; j++) {
+                    var yPos = cy + Math.pow(j, 1.8) * 2;
+                    if (yPos > this.height) break;
+                    var moveY = (this.tick * 0.5) % 10;
+                    this.ctx.moveTo(0, yPos + moveY);
+                    this.ctx.lineTo(this.width, yPos + moveY);
+                }
+                this.ctx.stroke();
+
+                // Spheres
+                for (var k = 0; k < this.spheres.length; k++) {
+                    var s = this.spheres[k];
+                    var bounce = Math.sin(t * 2 + s.phase) * 20;
+                    var x = cx + s.xBase;
+                    var y = cy + 50 + s.yBase - bounce;
+                    
+                    // Shadow
+                    this.ctx.save();
+                    this.ctx.translate(x, cy + 50 + s.yBase + s.r + 10);
+                    this.ctx.scale(1, 0.25);
+                    this.ctx.beginPath();
+                    var shadowSize = s.r * (1 - (bounce+20)/100); 
+                    this.ctx.arc(0, 0, Math.max(0, shadowSize), 0, Math.PI * 2);
+                    this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    this.ctx.fill();
+                    this.ctx.restore();
+
+                    // Sphere
+                    var r = s.r;
+                    var grad = this.ctx.createRadialGradient(x - r*0.3, y - r*0.3, r*0.1, x, y, r);
+                    if (s.type === 'chrome') {
+                        grad.addColorStop(0, '#fff'); grad.addColorStop(0.2, '#ccc');
+                        grad.addColorStop(0.5, '#666'); grad.addColorStop(1, '#111');
+                    } else if (s.type === 'red') {
+                        grad.addColorStop(0, '#fff'); grad.addColorStop(0.2, '#f44'); grad.addColorStop(1, '#400');
+                    } else if (s.type === 'gold') {
+                        grad.addColorStop(0, '#fff'); grad.addColorStop(0.2, '#fc0'); grad.addColorStop(0.6, '#c90'); grad.addColorStop(1, '#630');
+                    }
+                    this.ctx.fillStyle = grad;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, r, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            },
+
+            // --- 3D RAYTRACER (Pure JS, Pixel Buffer) ---
+            renderRaytracer: function() {
+                var w = this.rtWidth;
+                var h = this.rtHeight;
+                var data = this.imageData.data;
+                var t = Date.now() / 1000;
+
+                // --- SCENE SETUP ---
+                // Camera
+                var camX=0, camY=100, camZ=-250;
+                
+                // Light
+                var lightX=200, lightY=400, lightZ=-200; // Point light
+
+                // Update Sphere Positions (match 2D scene)
+                var sceneSpheres = [];
+                // Floor Y = 0
+                
+                // Reuse 2D sphere definitions but map to 3D space
+                for(var i=0; i<this.spheres.length; i++) {
+                    var s = this.spheres[i];
+                    var bounce = Math.sin(t * 2 + s.phase) * 20;
+                    // Map 2D coords to 3D roughly
+                    // 2D xBase -> 3D x
+                    // 2D yBase -> 3D z (depth)
+                    sceneSpheres.push({
+                        x: s.xBase * 1.5,
+                        y: s.r + Math.max(0, bounce + 20), // Height
+                        z: s.yBase * 1.5,
+                        r: s.r,
+                        type: s.type
+                    });
+                }
+
+                // --- RENDER LOOP ---
+                // Optimization: avoid object creation in loop
+                var idx = 0;
+                for (var y = 0; y < h; y++) {
+                    // Map y to -1..1 (inverted because canvas Y is down)
+                    var ny = 1 - 2 * ((y + 0.5) / h);
+                    
+                    for (var x = 0; x < w; x++) {
+                        var nx = 2 * ((x + 0.5) / w) - 1;
+
+                        // Ray dir (simple perspective, fov ~90)
+                        var dirX = nx * 128; // Aspect ratio assumed 1
+                        var dirY = ny * 128; 
+                        var dirZ = 128; // FOV constant
+
+                        // Rotate camera down slightly to look at floor
+                        // Rotate around X axis ~20 degrees (0.35 rad)
+                        var cosA = 0.94;
+                        var sinA = 0.34;
+                        var rDirY = dirY * cosA - dirZ * sinA;
+                        var rDirZ = dirY * sinA + dirZ * cosA;
+
+                        // Normalize direction
+                        var len = Math.sqrt(dirX*dirX + rDirY*rDirY + rDirZ*rDirZ);
+                        dirX /= len; rDirY /= len; rDirZ /= len;
+
+                        // Trace Ray
+                        var col = this.trace(camX, camY, camZ, dirX, rDirY, rDirZ, sceneSpheres, lightX, lightY, lightZ, 0);
+
+                        data[idx++] = col[0]; // R
+                        data[idx++] = col[1]; // G
+                        data[idx++] = col[2]; // B
+                        data[idx++] = 255;    // A
+                    }
+                }
+                
+                this.ctx.putImageData(this.imageData, 0, 0);
+            },
+
+            // Recursive Trace Function (Keep minimal for performance)
+            trace: function(ox, oy, oz, dx, dy, dz, spheres, lx, ly, lz, depth) {
+                var t = 10000;
+                var obj = null;
+                var isFloor = false;
+
+                // 1. Intersect Floor (Plane y=0)
+                // Ray: O + tD = P. P.y = 0 => oy + t*dy = 0 => t = -oy/dy
+                if (dy < -0.001) {
+                    var tFloor = -oy / dy;
+                    if (tFloor > 0 && tFloor < t) {
+                        t = tFloor;
+                        isFloor = true;
+                    }
+                }
+
+                // 2. Intersect Spheres
+                for (var i = 0; i < spheres.length; i++) {
+                    var s = spheres[i];
+                    var lx_ = s.x - ox; var ly_ = s.y - oy; var lz_ = s.z - oz;
+                    var tca = lx_*dx + ly_*dy + lz_*dz;
+                    if (tca < 0) continue;
+                    var d2 = (lx_*lx_ + ly_*ly_ + lz_*lz_) - tca*tca;
+                    var r2 = s.r * s.r;
+                    if (d2 > r2) continue;
+                    var thc = Math.sqrt(r2 - d2);
+                    var t0 = tca - thc;
+                    
+                    if (t0 > 0.1 && t0 < t) { t = t0; obj = s; isFloor = false; }
+                }
+
+                if (t === 10000) {
+                    // Sky Background
+                    var sky = Math.max(0, dy); // 0 to 1
+                    var r = 0 + sky * 135; 
+                    var g = 0 + sky * 206; 
+                    var b = 68 + sky * (235-68); 
+                    return [r, g, b];
+                }
+
+                // --- HIT POINT ---
+                var hx = ox + t*dx;
+                var hy = oy + t*dy;
+                var hz = oz + t*dz;
+
+                // --- NORMAL & MATERIAL ---
+                var nx, ny, nz;
+                var colR, colG, colB;
+                var refl = 0;
+
+                if (isFloor) {
+                    nx = 0; ny = 1; nz = 0;
+                    // Checkerboard
+                    var checkSize = 60;
+                    var fx = Math.floor(hx / checkSize);
+                    var fz = Math.floor(hz / checkSize);
+                    if ((fx + fz) % 2 === 0) {
+                        colR=120; colG=120; colB=120; 
+                    } else {
+                        colR=20; colG=20; colB=20; 
+                    }
+                    refl = 0.2;
+                } else {
+                    // Sphere Normal
+                    nx = hx - obj.x; ny = hy - obj.y; nz = hz - obj.z;
+                    var il = 1 / obj.r;
+                    nx *= il; ny *= il; nz *= il;
+
+                    if (obj.type === 'chrome') {
+                        colR=200; colG=200; colB=200; refl = 0.7;
+                    } else if (obj.type === 'red') {
+                        colR=220; colG=20; colB=20; refl = 0.1;
+                    } else if (obj.type === 'gold') {
+                        colR=218; colG=165; colB=32; refl = 0.4;
+                    }
+                }
+
+                // --- SHADING ---
+                // Light Vector
+                var ldx = lx - hx; var ldy = ly - hy; var ldz = lz - hz;
+                var lDist = Math.sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
+                ldx /= lDist; ldy /= lDist; ldz /= lDist;
+
+                // Shadows
+                var inShadow = false;
+                for(var j=0; j<spheres.length; j++) {
+                    var s = spheres[j];
+                    if (s === obj) continue; 
+                    var lx_ = s.x - hx; var ly_ = s.y - hy; var lz_ = s.z - hz;
+                    var tca = lx_*ldx + ly_*ldy + lz_*ldz;
+                    if (tca > 0) {
+                        var d2 = (lx_*lx_ + ly_*ly_ + lz_*lz_) - tca*tca;
+                        if (d2 < s.r*s.r) {
+                            var thc = Math.sqrt(s.r*s.r - d2);
+                            var t0 = tca - thc;
+                            if (t0 > 0.1 && t0 < lDist) { inShadow = true; break; }
+                        }
+                    }
+                }
+
+                // Diffuse
+                var diff = Math.max(0, nx*ldx + ny*ldy + nz*ldz);
+                if (inShadow) diff *= 0.2;
+
+                // Specular
+                var spec = 0;
+                if (!inShadow && diff > 0) {
+                    var dotLN = ldx*nx + ldy*ny + ldz*nz;
+                    var rlx = -ldx + 2*dotLN*nx;
+                    var rly = -ldy + 2*dotLN*ny;
+                    var rlz = -ldz + 2*dotLN*nz;
+                    
+                    var specDot = rlx*(-dx) + rly*(-dy) + rlz*(-dz);
+                    if (specDot > 0) {
+                        spec = Math.pow(specDot, 20) * 0.8;
+                    }
+                }
+
+                // Combine Color
+                var finalR = colR * 0.2 + colR * diff * 0.8 + spec * 255;
+                var finalG = colG * 0.2 + colG * diff * 0.8 + spec * 255;
+                var finalB = colB * 0.2 + colB * diff * 0.8 + spec * 255;
+
+                // --- REFLECTION ---
+                if (refl > 0 && depth < 2) {
+                    var dotDN = dx*nx + dy*ny + dz*nz;
+                    var rx = dx - 2*dotDN*nx;
+                    var ry = dy - 2*dotDN*ny;
+                    var rz = dz - 2*dotDN*nz;
+                    
+                    var rCol = this.trace(hx + rx*0.1, hy + ry*0.1, hz + rz*0.1, rx, ry, rz, spheres, lx, ly, lz, depth + 1);
+                    
+                    finalR = finalR * (1-refl) + rCol[0] * refl;
+                    finalG = finalG * (1-refl) + rCol[1] * refl;
+                    finalB = finalB * (1-refl) + rCol[2] * refl;
+                }
+
+                return [Math.min(255, finalR), Math.min(255, finalG), Math.min(255, finalB)];
+            }
+        };
+
+        window.onload = function() {
+            App.init();
+        };
+
+    </script>
+</body>
+</html>
