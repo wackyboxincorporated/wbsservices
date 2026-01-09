@@ -373,7 +373,7 @@
             height: 0,
             tick: 0,
             
-            // Raytracer Settings
+            // Raytracer Settings (Defaulted here, overwritten in init based on UA)
             rtWidth: 64,
             rtHeight: 64,
             imageData: null,
@@ -389,6 +389,22 @@
             ],
 
             init: function() {
+                // --- USER AGENT DETECTION LOGIC ---
+                var ua = navigator.userAgent;
+                // Checks for Safari 6 (Version/6) or Safari 5 (Version/5) or IE/Old WebKit
+                var isLegacy = (/Version\/[5-6]\..*Safari/.test(ua)) || 
+                               (ua.indexOf("MSIE") > -1) || 
+                               (ua.indexOf("Mozilla/4.0") > -1);
+
+                if (isLegacy) {
+                    this.rtWidth = 48;
+                    this.rtHeight = 48;
+                } else {
+                    this.rtWidth = 192;
+                    this.rtHeight = 320;
+                }
+                // -----------------------------------
+
                 this.canvas = document.getElementById('canvas-layer');
                 this.ctx = this.canvas.getContext('2d');
                 
@@ -718,8 +734,8 @@
                         data[idx++] = col[0]; 
                         data[idx++] = col[1]; 
                         data[idx++] = col[2]; 
-                        data[idx++] = 255;    
-                    }
+                        data[idx++] = 255;
+                        }
                 }
                 this.ctx.putImageData(this.imageData, 0, 0);
             },
