@@ -1,4 +1,5 @@
-Welcome to the first weekly WBS SERVICES report . Yes, I know it's "HTTP only" right now but I'm working on fixing that. Maybe.
+Welcome to the first weekly WBS SERVICES report . 
+Fixed site issues
 This week's report is as follows:
 
 ALGORITHMS!
