@@ -399,7 +399,7 @@
                 this.audio = new Audio();
                 // We attempt anonymous, but explicit HTTP might fail on HTTPS. 
                 // Browser security policies are beyond JS control, but the code requests it.
-                this.audio.src = 'http://wbsservices.work/pmu.mp3';
+                this.audio.src = 'https://wbsservices.work/pmu.mp3';
                 this.audio.loop = true;
 
                 // Event Listeners
@@ -524,7 +524,7 @@
                 var xhr = new XMLHttpRequest();
                 // Note: This request will fail if served over HTTPS due to mixed content rules
                 // or Cross-Origin policies, but this is the requested implementation.
-                xhr.open('GET', 'http://wbsservices.work/report.txt', true);
+                xhr.open('GET', 'https://wbsservices.work/report.txt', true);
                 
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
