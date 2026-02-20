@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>placeholder</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBS Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* RESET & BASE */
-        * {
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
+        /* Base Reset & Variables */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-highlight: rgba(255, 255, 255, 1);
+            --text-main: #0c4a6e;
+            --text-muted: #475569;
+            --accent-blue: #0284c7;
+            --accent-glow: #38bdf8;
         }
 
         body, html {
@@ -23,862 +22,469 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
+            font-family: 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+            color: var(--text-main);
             overflow: hidden;
-            /* 90s Serif aesthetic */
-            font-family: "Times New Roman", Times, serif;
-            font-style: italic;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* CANVAS LAYER */
-        #canvas-layer {
+        /* Organic Background Elements */
+        .bg-environment {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            background: #000;
-            
-            /* CRITICAL FOR RETRO LOOK: Nearest Neighbor Scaling */
-            image-rendering: -moz-crisp-edges;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: pixelated;
-            -ms-interpolation-mode: nearest-neighbor;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* UI LAYER (Intro) */
-        #ui-layer {
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(3vw, 4vh) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .orb {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 320px;
-            height: 240px;
-            margin-top: -120px;
-            margin-left: -160px;
-            z-index: 10;
-            text-align: center;
-            color: #d4d4d4;
-            
-            /* FADE TRANSITION */
-            -webkit-transition: opacity 2.0s ease-in-out;
-            -moz-transition: opacity 2.0s ease-in-out;
-            transition: opacity 2.0s ease-in-out;
-            opacity: 1;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.6;
         }
 
-        h1 {
-            font-size: 32px;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-            color: #d4d4d4;
-            text-shadow: 2px 2px 0px #000;
-            font-weight: bold;
-            text-transform: uppercase;
+        .orb-1 {
+            width: 60vw; height: 60vw;
+            background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0) 70%);
+            top: -20vh; left: -10vw;
+            animation: drift 25s ease-in-out infinite;
         }
 
-        .subtitle {
-            font-size: 14px;
-            color: #808080;
-            margin-bottom: 25px;
-            font-family: "Courier New", monospace;
-            text-shadow: 1px 1px 0 #000;
+        .orb-2 {
+            width: 70vw; height: 50vw;
+            background: radial-gradient(ellipse, #a7f3d0 0%, rgba(167,243,208,0) 70%);
+            bottom: -15vh; right: -15vw;
+            animation: drift 30s ease-in-out infinite reverse;
         }
 
-        .status {
-            font-size: 14px;
-            color: #ffff00;
-            margin-bottom: 15px;
-            background-color: #000080; /* Classic DOS/Windows blue */
-            display: inline-block;
-            padding: 2px 5px;
-            box-shadow: 2px 2px 0 #000;
-        }
-
-        /* 90s BEVELED BUTTON STYLE */
-        .retro-btn {
-            background: #c0c0c0;
-            border-top: 2px solid #fff;
-            border-left: 2px solid #fff;
-            border-right: 2px solid #404040;
-            border-bottom: 2px solid #404040;
-            color: #000;
-            padding: 8px 15px;
-            font-family: "MS Sans Serif", Geneva, sans-serif;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            outline: none;
-            -webkit-border-radius: 0;
-            border-radius: 0;
-            -webkit-appearance: none;
-            box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .retro-btn:active {
-            border-top: 2px solid #404040;
-            border-left: 2px solid #404040;
-            border-right: 2px solid #fff;
-            border-bottom: 2px solid #fff;
-            transform: translate(1px, 1px);
-        }
-
-        #play-btn {
-            padding: 8px 25px;
-            font-size: 14px;
-        }
-
-        /* RAYTRACE UI (Hidden by default) */
-        #rt-ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
-            display: none;
-            pointer-events: none; /* Let clicks pass through to canvas when not interacting */
-        }
-
-        #view-report-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            pointer-events: auto;
-            z-index: 30;
-        }
-
-        /* POPUP WINDOW */
-        #popup-window {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 80%; /* Responsive width */
-            max-width: 600px;
-            height: 400px;
-            margin-left: -40%; /* Fallback centering */
-            margin-top: -200px;
-            background: rgba(0, 0, 0, 0.7); /* 70% transparent */
-            border: 2px solid #808080;
-            display: none; /* Hidden by default */
-            pointer-events: auto;
-            flex-direction: column;
-            z-index: 40;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
-        }
-        
-        @media (min-width: 750px) {
-            #popup-window { margin-left: -300px; }
-        }
-
-        /* HOTBAR */
-        .hotbar {
-            height: 40px;
-            background: rgba(40, 40, 40, 0.9);
-            border-bottom: 1px solid #666;
-            display: block;
-            padding: 5px;
-            text-align: left;
-            white-space: nowrap;
-            overflow-x: auto;
-        }
-
-        .hotbar-label {
-            color: #aaa;
-            font-family: "MS Sans Serif", sans-serif;
-            font-size: 10px;
-            margin-right: 5px;
-            font-style: normal;
-        }
-
-        .color-swatch {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 1px solid #fff;
-            margin-right: 4px;
-            cursor: pointer;
-            vertical-align: middle;
-        }
-        
-        .font-btn {
-            display: inline-block;
-            background: #444;
-            color: #fff;
-            border: 1px solid #888;
-            font-size: 10px;
-            padding: 2px 5px;
-            cursor: pointer;
-            margin-right: 5px;
-            font-family: sans-serif;
-            font-style: normal;
-        }
-
-        .close-btn {
-            float: right;
-            background: #a00;
-            color: #fff;
-            border: 1px solid #f00;
-            font-weight: bold;
-            width: 20px;
-            height: 20px;
-            line-height: 18px;
-            text-align: center;
-            cursor: pointer;
-            font-family: sans-serif;
-            font-style: normal;
-        }
-
-        /* SCROLLING TEXT AREA */
-        #text-content {
-            display: block;
-            width: 100%;
-            height: 356px; /* 400 - 44 */
-            overflow-y: scroll; /* Standard scrollbar */
-            padding: 15px;
-            color: #0f0; /* Default */
-            font-family: "Courier New", monospace; /* Default */
-            font-style: normal;
-            font-size: 14px;
-            line-height: 1.4;
-            text-align: left;
-            white-space: pre-wrap; /* Preserve text formatting */
-        }
-        
-        /* Highlight Class */
-        .highlighted {
-            background-color: transparent; /* Set dynamically */
-            color: #000;
-            padding: 0 2px;
-        }
-
-        /* LOADER */
-        .loading-container {
-            width: 200px;
-            height: 20px;
-            background: #808080;
-            border-top: 2px solid #404040;
-            border-left: 2px solid #404040;
-            border-right: 2px solid #fff;
-            border-bottom: 2px solid #fff;
-            margin: 20px auto;
+        /* Layout Architecture */
+        .app-container {
             position: relative;
-            display: none;
-            padding: 2px;
-        }
-        .loading-bar {
-            width: 0%;
-            height: 100%;
-            background: #000080;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            height: 12px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        /* FOOTER */
-        .footer {
-            position: absolute;
-            bottom: 5px;
-            right: 10px;
-            text-align: right;
-            color: #666;
-            font-family: "Courier New", monospace;
-            font-size: 10px;
-            z-index: 10;
-            text-shadow: 1px 1px 0 #000;
+        /* Header Navigation */
+        .header-glass {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+            background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Glossy Controls */
+        .gloss-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(224,242,254,0.9) 100%);
+            border: 1px solid #7dd3fc;
+            padding: 0.6rem 1.25rem;
+            border-radius: 20px;
+            color: var(--accent-blue);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05), inset 0 1px 0 #ffffff;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gloss-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15), inset 0 1px 0 #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .gloss-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%);
+        }
+
+        /* Mobile Tab Controls */
+        .tab-nav {
+            display: none;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 0.5rem;
+            border-radius: 16px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+
+        .tab-toggle {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-toggle.active {
+            background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 #ffffff;
+            color: var(--text-main);
+        }
+
+        /* Content Area */
+        .main-workspace {
+            display: flex;
+            flex: 1;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
+        .glass-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            border-top: 2px solid var(--glass-highlight);
+            border-left: 1px solid var(--glass-highlight);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .panel-titlebar {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7dd3fc, #0284c7);
+            box-shadow: 0 0 8px rgba(2, 132, 199, 0.5), inset 0 1px 2px #ffffff;
+        }
+
+        .panel-viewport {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { 
+            background: rgba(255, 255, 255, 0.2); 
+            border-radius: 10px; 
+            margin: 0.5rem;
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(2, 132, 199, 0.25); 
+            border-radius: 10px; 
+            border: 3px solid transparent;
+            background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background-color: rgba(2, 132, 199, 0.45); 
+        }
+
+        /* List Items & Categories */
+        .service-group {
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .group-header {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            padding-bottom: 0.5rem;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(240,249,255,0.85) 100%);
+            border-radius: 12px;
+            border: 1px solid #e0f2fe;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(2, 132, 199, 0.08);
+            border-color: #bae6fd;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.95rem;
+        }
+
+        .item-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .item-price {
+            background: linear-gradient(180deg, #f8fafc 0%, #e0f2fe 100%);
+            color: var(--accent-blue);
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 1px solid #bae6fd;
+            box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            margin-left: 1rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 0.75rem;
+            }
+            .header-glass {
+                padding: 1rem;
+                border-radius: 16px;
+            }
+            .tab-nav {
+                display: flex;
+            }
+            .glass-panel {
+                display: none;
+                border-radius: 16px;
+            }
+            .glass-panel.active {
+                display: flex;
+            }
         }
     </style>
 </head>
 <body>
-
-    <canvas id="canvas-layer"></canvas>
-
-    <div id="ui-layer">
-        <h1 id="title-text">placeholder</h1>
-        <div class="subtitle">wbs services is coming soon..</div>
-        
-        <div class="status" id="status-text">in the meantime...</div>
-        <br><br>
-        
-        <button id="play-btn" class="retro-btn">check this other thing out?</button>
-        
-        <div class="loading-container" id="loader">
-            <div class="loading-bar" id="loader-fill"></div>
-        </div>
+    <div class="bg-environment">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
     </div>
 
-    <div id="rt-ui-layer">
-        <button id="view-report-btn" class="retro-btn">VIEW REPORT</button>
-        
-        <div id="popup-window">
-            <div class="hotbar">
-                <div class="close-btn" id="close-popup">X</div>
-                
-                <span class="hotbar-label">FONT:</span>
-                <span class="font-btn" onclick="App.setTextFont('courier')">MONO</span>
-                <span class="font-btn" onclick="App.setTextFont('arial')">SANS</span>
-                
-                <span style="display:inline-block; width:10px;"></span>
-                
-                <span class="hotbar-label">COLOR:</span>
-                <div class="color-swatch" style="background:#00FF00;" onclick="App.setTextColor('#00FF00')"></div>
-                <div class="color-swatch" style="background:#00FFFF;" onclick="App.setTextColor('#00FFFF')"></div>
-                <div class="color-swatch" style="background:#FFFF00;" onclick="App.setTextColor('#FFFF00')"></div>
-                <div class="color-swatch" style="background:#FFFFFF;" onclick="App.setTextColor('#FFFFFF')"></div>
+    <div class="app-container">
+        <header class="header-glass">
+            <h1 class="brand-title">WBS Services</h1>
+            <button class="gloss-btn" onclick="alert('System Ready.')">Connect</button>
+        </header>
 
-                <span style="display:inline-block; width:10px;"></span>
+        <nav class="tab-nav">
+            <button class="tab-toggle active" onclick="switchTab('wbs')">General</button>
+            <button class="tab-toggle" onclick="switchTab('nintendo')">Nintendo</button>
+        </nav>
 
-                <span class="hotbar-label">H-LITE:</span>
-                <div class="color-swatch" style="background:#FF00FF;" onclick="App.setHighlight('#FF00FF')"></div>
-                <div class="color-swatch" style="background:#FFA500;" onclick="App.setHighlight('#FFA500')"></div>
-                <div class="color-swatch" style="background:#0080FF;" onclick="App.setHighlight('#0080FF')"></div>
-            </div>
-            <div id="text-content">Loading report data...</div>
-        </div>
+        <main class="main-workspace">
+            <section id="wbs" class="glass-panel active">
+                <div class="panel-titlebar">
+                    <span class="status-indicator"></span>
+                    General Services
+                </div>
+                <div class="panel-viewport">
+                    
+                    <div class="service-group">
+                        <div class="group-header">Hardware Modifications</div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Screen Replacement</span>
+                                <span class="item-subtitle">High-fidelity IPS / OLED installation</span>
+                            </div>
+                            <span class="item-price">$45 + Parts</span>
+                        </div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Battery Upgrades</span>
+                                <span class="item-subtitle">Extended capacity lithium cells</span>
+                            </div>
+                            <span class="item-price">$30 + Parts</span>
+                        </div>
+                    </div>
+
+                    <div class="service-group">
+                        <div class="group-header">Custom Engineering</div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">USB-C Implementation</span>
+                                <span class="item-subtitle">Modern charging standard conversion</span>
+                            </div>
+                            <span class="item-price">$50 + Parts</span>
+                        </div>
+
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Custom Shell Swaps</span>
+                                <span class="item-subtitle">Translucent aesthetics and fabrication</span>
+                            </div>
+                            <span class="item-price">$40 + Parts</span>
+                        </div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Custom Build Request</span>
+                                <span class="item-subtitle">W/ USB power bank</span>
+                            </div>
+                            <span class="item-price">$?? + Parts</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="nintendo" class="glass-panel">
+                <div class="panel-titlebar">
+                    <span class="status-indicator" style="background: linear-gradient(135deg, #a7f3d0, #10b981); box-shadow: 0 0 8px rgba(16, 185, 129, 0.5), inset 0 1px 2px #ffffff;"></span>
+                    Nintendo Handhelds
+                </div>
+                <div class="panel-viewport">
+                    
+                    <div class="service-group">
+                        <div class="group-header">Game Boy Advance</div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">IPS Laminated Screen</span>
+                                <span class="item-subtitle">Zero dust, perfect alignment</span>
+                            </div>
+                            <span class="item-price">$60 + Parts</span>
+                        </div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Audio Amplifier</span>
+                                <span class="item-subtitle">CleanPower filtering and speaker upgrade</span>
+                            </div>
+                            <span class="item-price">$35 + Parts</span>
+                        </div>
+                    </div>
+
+                    <div class="service-group">
+                        <div class="group-header">Dual Screen Systems</div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Top Screen Assembly</span>
+                                <span class="item-subtitle">DS / 3DS upper display replacement</span>
+                            </div>
+                            <span class="item-price">$75 + Parts</span>
+                        </div>
+                        
+                        <div class="list-item">
+                            <div class="item-details">
+                                <span class="item-title">Hardware Capture Board</span>
+                                <span class="item-subtitle">Direct uncompressed video output</span>
+                            </div>
+                            <span class="item-price">$120 + Parts</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
     </div>
-
-    <div class="footer">yes</div>
 
     <script>
-        // --- COMPATIBILITY POLYFILLS FOR ANCIENT BROWSERS ---
-        (function() {
-            var lastTime = 0;
-            var vendors = ['webkit', 'moz'];
-            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-                window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+        function switchTab(tabId) {
+            if (window.innerWidth <= 768) {
+                // Mobile layout: Display one panel at a time
+                document.querySelectorAll('.glass-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+
+                // Update styling for navigation buttons
+                document.querySelectorAll('.tab-toggle').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
             }
-            if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function(callback, element) {
-                    var currTime = new Date().getTime();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
+        }
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                // Desktop layout: Always show both panels
+                document.querySelectorAll('.glass-panel').forEach(panel => {
+                    panel.classList.add('active');
+                });
+            } else {
+                // Switching from desktop to mobile: Ensure only one is active to prevent stacking
+                const activePanels = document.querySelectorAll('.glass-panel.active');
+                if (activePanels.length !== 1) {
+                    document.querySelectorAll('.glass-panel').forEach(panel => panel.classList.remove('active'));
+                    document.getElementById('wbs').classList.add('active');
+                    
+                    document.querySelectorAll('.tab-toggle').forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.tab-toggle').classList.add('active');
+                }
             }
-        }());
+        });
 
-        // --- APP LOGIC ---
-        var App = {
-            isPlaying: false,
-            audio: null,
-            canvas: null,
-            ctx: null,
-            width: 0,
-            height: 0,
-            tick: 0,
-            
-            // Raytracer Settings (Defaulted here, overwritten in init based on UA)
-            rtWidth: 64,
-            rtHeight: 64,
-            imageData: null,
-            
-            // Text UI State
-            textLoaded: false,
-            
-            // "Scene" Objects
-            spheres: [
-                { id: 1, type: 'chrome', r: 50, xBase: 0, yBase: -20, speed: 0.03, phase: 0 },
-                { id: 2, type: 'red', r: 35, xBase: -90, yBase: 10, speed: 0.04, phase: 2 },
-                { id: 3, type: 'gold', r: 25, xBase: 90, yBase: 30, speed: 0.05, phase: 4 }
-            ],
-
-            init: function() {
-                // --- USER AGENT DETECTION LOGIC ---
-                var ua = navigator.userAgent;
-                // Checks for Safari 6 (Version/6) or Safari 5 (Version/5) or IE/Old WebKit
-                var isLegacy = (/Version\/[5-6]\..*Safari/.test(ua)) || 
-                               (ua.indexOf("MSIE") > -1) || 
-                               (ua.indexOf("Mozilla/4.0") > -1);
-
-                if (isLegacy) {
-                    this.rtWidth = 48;
-                    this.rtHeight = 48;
-                } else {
-                    this.rtWidth = 192;
-                    this.rtHeight = 320;
-                }
-                // -----------------------------------
-
-                this.canvas = document.getElementById('canvas-layer');
-                this.ctx = this.canvas.getContext('2d');
-                
-                // Set initial high-res for 2D mode
-                this.resize();
-
-                // Setup Audio - NEW URL (HTTP)
-                this.audio = new Audio();
-                // We attempt anonymous, but explicit HTTP might fail on HTTPS. 
-                // Browser security policies are beyond JS control, but the code requests it.
-                this.audio.src = 'https://www.wbsservices.work/pmu.mp3';
-                this.audio.loop = true;
-
-                // Event Listeners
-                var self = this;
-                window.addEventListener('resize', function() { 
-                    if (!self.isPlaying) self.resize(); 
-                }, false);
-                
-                // Main Play Button
-                var btn = document.getElementById('play-btn');
-                var startEvent = ('ontouchstart' in window) ? 'touchend' : 'click';
-                btn.addEventListener(startEvent, function(e) {
-                    e.preventDefault();
-                    self.togglePlay();
-                }, false);
-
-                // View Report Button
-                document.getElementById('view-report-btn').addEventListener('click', function() {
-                    self.togglePopup(true);
-                }, false);
-
-                // Close Popup
-                document.getElementById('close-popup').addEventListener('click', function() {
-                    self.togglePopup(false);
-                }, false);
-
-                this.animate();
-            },
-
-            resize: function() {
-                if (this.isPlaying) return; 
-                this.width = window.innerWidth;
-                this.height = window.innerHeight;
-                this.canvas.width = this.width;
-                this.canvas.height = this.height;
-            },
-
-            togglePlay: function() {
-                var btn = document.getElementById('play-btn');
-                var status = document.getElementById('status-text');
-                var loader = document.getElementById('loader');
-                var loaderFill = document.getElementById('loader-fill');
-                var uiLayer = document.getElementById('ui-layer');
-                var rtUiLayer = document.getElementById('rt-ui-layer');
-
-                if (!this.isPlaying) {
-                    // Start Sequence
-                    status.innerHTML = "LOADING ASSETS...";
-                    btn.style.display = 'none';
-                    loader.style.display = 'block';
-
-                    var width = 0;
-                    var self = this;
-                    var loadInterval = setInterval(function() {
-                        width += 4;
-                        loaderFill.style.width = width + '%';
-                        if (width >= 100) {
-                            clearInterval(loadInterval);
-                            
-                            self.startAudio();
-                            
-                            status.innerHTML = "RENDERING...";
-                            uiLayer.style.opacity = '0'; 
-                            
-                            setTimeout(function() {
-                                if (uiLayer.style.opacity === '0') {
-                                    self.switchToRaytracer();
-                                    rtUiLayer.style.display = 'block'; // Show Report Button
-                                }
-                            }, 2000);
-                        }
-                    }, 20);
-                } else {
-                    // This branch likely won't be reached in typical usage, but just in case
-                    this.stopAudio();
-                    this.isPlaying = false;
-                    this.resize();
-                    uiLayer.style.opacity = '1';
-                    btn.style.display = 'inline-block';
-                    btn.innerHTML = "RESUME RENDER";
-                    status.innerHTML = "RENDER PAUSED";
-                    loader.style.display = 'none';
-                    rtUiLayer.style.display = 'none';
-                }
-            },
-
-            switchToRaytracer: function() {
-                this.isPlaying = true;
-                this.canvas.width = this.rtWidth;
-                this.canvas.height = this.rtHeight;
-                this.imageData = this.ctx.createImageData(this.rtWidth, this.rtHeight);
-            },
-
-            startAudio: function() {
-                var playPromise = this.audio.play();
-                if (playPromise !== undefined && typeof playPromise.catch === 'function') {
-                    playPromise.catch(function(error) { /* Autoplay handling */ });
-                }
-            },
-
-            stopAudio: function() {
-                this.audio.pause();
-            },
-
-            // --- POPUP LOGIC ---
-            togglePopup: function(show) {
-                var pop = document.getElementById('popup-window');
-                if (show) {
-                    pop.style.display = 'flex';
-                    if (!this.textLoaded) {
-                        this.fetchReport();
-                    }
-                } else {
-                    pop.style.display = 'none';
-                }
-            },
-
-            fetchReport: function() {
-                var self = this;
-                var txtArea = document.getElementById('text-content');
-                
-                var xhr = new XMLHttpRequest();
-                // Note: This request will fail if served over HTTPS due to mixed content rules
-                // or Cross-Origin policies, but this is the requested implementation.
-                xhr.open('GET', 'https://www.wbsservices.work/report.txt', true);
-                
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            txtArea.textContent = xhr.responseText;
-                        } else {
-                            txtArea.innerHTML = "CONNECTION ERROR: " + xhr.status + "<br>Could not retrieve report from server.<br>Ensure protocol matches (HTTP vs HTTPS).";
-                        }
-                        self.textLoaded = true;
-                    }
-                };
-                
-                try {
-                    xhr.send();
-                } catch(e) {
-                    txtArea.innerHTML = "SECURITY ERROR: " + e.message;
-                }
-            },
-
-            setTextFont: function(fontName) {
-                var area = document.getElementById('text-content');
-                if (fontName === 'courier') area.style.fontFamily = '"Courier New", monospace';
-                if (fontName === 'arial') area.style.fontFamily = 'Arial, Helvetica, sans-serif';
-            },
-
-            setTextColor: function(col) {
-                document.getElementById('text-content').style.color = col;
-            },
-
-            setHighlight: function(col) {
-                document.getElementById('text-content').style.backgroundColor = col;
-                // Optional: make text black if highlight is bright to ensure readability
-                document.getElementById('text-content').style.color = '#000000';
-            },
-
-            // --- ANIMATION LOOP ---
-            animate: function() {
-                var self = this;
-                requestAnimationFrame(function() { self.animate(); });
-                this.tick++;
-
-                if (this.isPlaying) {
-                    this.renderRaytracer();
-                } else {
-                    this.render2DScene();
-                }
-            },
-
-            // --- 2D SCENE (IMPROVED) ---
-            render2DScene: function() {
-                var t = Date.now() / 1000;
-                var cx = this.width / 2;
-                var cy = this.height / 2;
-
-                // Sky - Improved Gradient
-                var skyGrad = this.ctx.createLinearGradient(0, 0, 0, cy);
-                skyGrad.addColorStop(0, '#000022'); 
-                skyGrad.addColorStop(0.5, '#000066'); 
-                skyGrad.addColorStop(1, '#AA44AA'); // Vaporwave purple tint
-                this.ctx.fillStyle = skyGrad;
-                this.ctx.fillRect(0, 0, this.width, cy);
-
-                // Retro "Sun"
-                var sunY = cy - 80;
-                var sunGrad = this.ctx.createLinearGradient(0, sunY-60, 0, sunY+60);
-                sunGrad.addColorStop(0, '#FFFF00');
-                sunGrad.addColorStop(1, '#FF0055');
-                this.ctx.fillStyle = sunGrad;
-                this.ctx.beginPath();
-                this.ctx.arc(cx, sunY, 60, 0, Math.PI*2);
-                this.ctx.fill();
-                
-                // Sun stripes
-                this.ctx.fillStyle = skyGrad; // Use sky color to "cut" stripes
-                for(var st=0; st<10; st++) {
-                    var yS = sunY + 10 + (st*6);
-                    var hS = 2 + (st * 0.5);
-                    this.ctx.fillRect(cx-70, yS, 140, hS);
-                }
-
-                // Floor
-                var floorGrad = this.ctx.createLinearGradient(0, cy, 0, this.height);
-                floorGrad.addColorStop(0, '#220022');
-                floorGrad.addColorStop(1, '#000000');
-                this.ctx.fillStyle = floorGrad;
-                this.ctx.fillRect(0, cy, this.width, this.height - cy);
-
-                // Grid (Pulsing)
-                this.ctx.strokeStyle = 'rgba(255, 0, 255, 0.4)';
-                this.ctx.lineWidth = 1;
-                this.ctx.beginPath();
-                // Vertical lines moving
-                for (var i = -30; i <= 30; i++) {
-                    // Perspective math for floor
-                    this.ctx.moveTo(cx, cy);
-                    this.ctx.lineTo(cx + (i * 120 * 4), this.height + 200);
-                }
-                // Horizontal lines moving forward
-                for (var j = 0; j < 30; j++) {
-                    var p = (j + (t%1)) / 20; // 0 to 1
-                    var yPos = cy + (Math.pow(p, 2) * (this.height/2));
-                    if (yPos > this.height) continue;
-                    this.ctx.moveTo(0, yPos);
-                    this.ctx.lineTo(this.width, yPos);
-                }
-                this.ctx.stroke();
-
-                // Spheres
-                for (var k = 0; k < this.spheres.length; k++) {
-                    var s = this.spheres[k];
-                    var bounce = Math.sin(t * 2 + s.phase) * 20;
-                    var x = cx + s.xBase;
-                    var y = cy + 50 + s.yBase - bounce;
-                    
-                    // Shadow
-                    this.ctx.save();
-                    this.ctx.translate(x, cy + 50 + s.yBase + s.r + 10);
-                    this.ctx.scale(1, 0.25);
-                    this.ctx.beginPath();
-                    var shadowSize = s.r * (1 - (bounce+20)/100); 
-                    this.ctx.arc(0, 0, Math.max(0, shadowSize), 0, Math.PI * 2);
-                    this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                    this.ctx.fill();
-                    this.ctx.restore();
-
-                    // Sphere Rendering
-                    var r = s.r;
-                    var grad = this.ctx.createRadialGradient(x - r*0.3, y - r*0.3, r*0.1, x, y, r);
-                    if (s.type === 'chrome') {
-                        grad.addColorStop(0, '#fff'); grad.addColorStop(0.2, '#ccc');
-                        grad.addColorStop(0.5, '#666'); grad.addColorStop(1, '#111');
-                    } else if (s.type === 'red') {
-                        grad.addColorStop(0, '#fff'); grad.addColorStop(0.2, '#f44'); grad.addColorStop(1, '#400');
-                    } else if (s.type === 'gold') {
-                        grad.addColorStop(0, '#fff'); grad.addColorStop(0.2, '#fc0'); grad.addColorStop(0.6, '#c90'); grad.addColorStop(1, '#630');
-                    }
-                    this.ctx.fillStyle = grad;
-                    this.ctx.beginPath();
-                    this.ctx.arc(x, y, r, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-            },
-
-            // --- 3D RAYTRACER (IMPROVED) ---
-            renderRaytracer: function() {
-                var w = this.rtWidth;
-                var h = this.rtHeight;
-                var data = this.imageData.data;
-                var t = Date.now() / 1000;
-
-                // Scene Setup
-                var camX=0, camY=120, camZ=-280; // Moved cam back slightly
-                var lightX=200, lightY=400, lightZ=-200;
-
-                var sceneSpheres = [];
-                // Map Spheres
-                for(var i=0; i<this.spheres.length; i++) {
-                    var s = this.spheres[i];
-                    var bounce = Math.sin(t * 2 + s.phase) * 20;
-                    sceneSpheres.push({
-                        x: s.xBase * 1.5,
-                        y: s.r + Math.max(0, bounce + 20),
-                        z: s.yBase * 1.5,
-                        r: s.r,
-                        type: s.type
-                    });
-                }
-
-                var idx = 0;
-                for (var y = 0; y < h; y++) {
-                    var ny = 1 - 2 * ((y + 0.5) / h);
-                    for (var x = 0; x < w; x++) {
-                        var nx = 2 * ((x + 0.5) / w) - 1;
-                        
-                        // Direction
-                        var dirX = nx * 128; 
-                        var dirY = ny * 128; 
-                        var dirZ = 128; 
-
-                        // Camera Rotation
-                        var cosA = 0.94;
-                        var sinA = 0.34;
-                        var rDirY = dirY * cosA - dirZ * sinA;
-                        var rDirZ = dirY * sinA + dirZ * cosA;
-                        
-                        var len = Math.sqrt(dirX*dirX + rDirY*rDirY + rDirZ*rDirZ);
-                        dirX /= len; rDirY /= len; rDirZ /= len;
-
-                        var col = this.trace(camX, camY, camZ, dirX, rDirY, rDirZ, sceneSpheres, lightX, lightY, lightZ, 0);
-
-                        data[idx++] = col[0]; 
-                        data[idx++] = col[1]; 
-                        data[idx++] = col[2]; 
-                        data[idx++] = 255;
-                        }
-                }
-                this.ctx.putImageData(this.imageData, 0, 0);
-            },
-
-            trace: function(ox, oy, oz, dx, dy, dz, spheres, lx, ly, lz, depth) {
-                var t = 10000;
-                var obj = null;
-                var isFloor = false;
-
-                // Floor Intersect
-                if (dy < -0.001) {
-                    var tFloor = -oy / dy;
-                    if (tFloor > 0 && tFloor < t) {
-                        t = tFloor;
-                        isFloor = true;
-                    }
-                }
-
-                // Sphere Intersect
-                for (var i = 0; i < spheres.length; i++) {
-                    var s = spheres[i];
-                    var lx_ = s.x - ox; var ly_ = s.y - oy; var lz_ = s.z - oz;
-                    var tca = lx_*dx + ly_*dy + lz_*dz;
-                    if (tca < 0) continue;
-                    var d2 = (lx_*lx_ + ly_*ly_ + lz_*lz_) - tca*tca;
-                    var r2 = s.r * s.r;
-                    if (d2 > r2) continue;
-                    var thc = Math.sqrt(r2 - d2);
-                    var t0 = tca - thc;
-                    if (t0 > 0.1 && t0 < t) { t = t0; obj = s; isFloor = false; }
-                }
-
-                if (t === 10000) {
-                    // IMPROVED SKY: Darker retro gradient
-                    var sky = Math.max(0, dy); 
-                    var r = 0 + sky * 100; 
-                    var g = 0 + sky * 50; 
-                    var b = 40 + sky * 120; 
-                    return [r, g, b];
-                }
-
-                var hx = ox + t*dx;
-                var hy = oy + t*dy;
-                var hz = oz + t*dz;
-
-                var nx, ny, nz;
-                var colR, colG, colB;
-                var refl = 0;
-
-                if (isFloor) {
-                    nx = 0; ny = 1; nz = 0;
-                    // IMPROVED CHECKERBOARD: Moving illusion
-                    var moveZ = (Date.now()/1000) * 40;
-                    var checkSize = 60;
-                    var fx = Math.floor(hx / checkSize);
-                    var fz = Math.floor((hz + moveZ) / checkSize);
-                    
-                    if ((fx + fz) % 2 === 0) {
-                        colR=140; colG=140; colB=140; 
-                    } else {
-                        colR=30; colG=0; colB=40; // Slight purple tint on dark squares
-                    }
-                    
-                    // Fade floor into distance
-                    var dist = Math.sqrt(hx*hx + hz*hz);
-                    var fog = Math.min(1, dist/800);
-                    colR = colR * (1-fog);
-                    colG = colG * (1-fog);
-                    colB = colB * (1-fog) + 40 * fog; // Fade to blueish
-
-                    refl = 0.3;
-                } else {
-                    nx = hx - obj.x; ny = hy - obj.y; nz = hz - obj.z;
-                    var il = 1 / obj.r;
-                    nx *= il; ny *= il; nz *= il;
-
-                    if (obj.type === 'chrome') {
-                        colR=220; colG=220; colB=220; refl = 0.6;
-                    } else if (obj.type === 'red') {
-                        colR=220; colG=40; colB=40; refl = 0.2;
-                    } else if (obj.type === 'gold') {
-                        colR=230; colG=180; colB=40; refl = 0.5;
-                    }
-                }
-
-                // Shading
-                var ldx = lx - hx; var ldy = ly - hy; var ldz = lz - hz;
-                var lDist = Math.sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
-                ldx /= lDist; ldy /= lDist; ldz /= lDist;
-
-                var inShadow = false;
-                for(var j=0; j<spheres.length; j++) {
-                    var s = spheres[j];
-                    if (s === obj) continue; 
-                    var lx_ = s.x - hx; var ly_ = s.y - hy; var lz_ = s.z - hz;
-                    var tca = lx_*ldx + ly_*ldy + lz_*ldz;
-                    if (tca > 0) {
-                        var d2 = (lx_*lx_ + ly_*ly_ + lz_*lz_) - tca*tca;
-                        if (d2 < s.r*s.r) {
-                            var thc = Math.sqrt(s.r*s.r - d2);
-                            var t0 = tca - thc;
-                            if (t0 > 0.1 && t0 < lDist) { inShadow = true; break; }
-                        }
-                    }
-                }
-
-                var diff = Math.max(0, nx*ldx + ny*ldy + nz*ldz);
-                if (inShadow) diff *= 0.3;
-
-                var spec = 0;
-                if (!inShadow && diff > 0) {
-                    var dotLN = ldx*nx + ldy*ny + ldz*nz;
-                    var rlx = -ldx + 2*dotLN*nx;
-                    var rly = -ldy + 2*dotLN*ny;
-                    var rlz = -ldz + 2*dotLN*nz;
-                    var specDot = rlx*(-dx) + rly*(-dy) + rlz*(-dz);
-                    if (specDot > 0) {
-                        spec = Math.pow(specDot, 15) * 0.7;
-                    }
-                }
-
-                var finalR = colR * 0.3 + colR * diff * 0.7 + spec * 255;
-                var finalG = colG * 0.3 + colG * diff * 0.7 + spec * 255;
-                var finalB = colB * 0.3 + colB * diff * 0.7 + spec * 255;
-
-                if (refl > 0 && depth < 2) {
-                    var dotDN = dx*nx + dy*ny + dz*nz;
-                    var rx = dx - 2*dotDN*nx;
-                    var ry = dy - 2*dotDN*ny;
-                    var rz = dz - 2*dotDN*nz;
-                    var rCol = this.trace(hx + rx*0.1, hy + ry*0.1, hz + rz*0.1, rx, ry, rz, spheres, lx, ly, lz, depth + 1);
-                    finalR = finalR * (1-refl) + rCol[0] * refl;
-                    finalG = finalG * (1-refl) + rCol[1] * refl;
-                    finalB = finalB * (1-refl) + rCol[2] * refl;
-                }
-
-                return [Math.min(255, finalR), Math.min(255, finalG), Math.min(255, finalB)];
-            }
-        };
-
-        window.onload = function() {
-            App.init();
-        };
+        // Lifecycle init validation
+        if (window.innerWidth > 768) {
+            document.querySelectorAll('.glass-panel').forEach(panel => {
+                panel.classList.add('active');
+            });
+        }
     </script>
 </body>
 </html>
