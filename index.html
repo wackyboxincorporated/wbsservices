@@ -1,490 +1,519 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WBS Services</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="index.css">
     <style>
-        /* Base Reset & Variables */
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --glass-highlight: rgba(255, 255, 255, 1);
-            --text-main: #0c4a6e;
-            --text-muted: #475569;
-            --accent-blue: #0284c7;
-            --accent-glow: #38bdf8;
-        }
-
-        body, html {
-            margin: 0;
+        body {
+            font-family: 'Unifont', 'MS Sans Serif', 'Fixedsys', 'Terminal', sans-serif;
+            background-color: #C0C0C0;
+            /* Windoze 99 theme */
+            color: #000000;
             padding: 0;
-            width: 100%;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            /* Prevent body scroll on desktop */
+        }
+
+        /* Scrollbar styling for that retro feel */
+        ::-webkit-scrollbar {
+            width: 16px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #dfdfdf;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+        }
+
+        .window-frame {
+            background-color: #C0C0C0;
+            border: 2px solid #FFFFFF;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            box-shadow: 1px 1px #000000;
             height: 100%;
-            font-family: 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
-            color: var(--text-main);
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Organic Background Elements */
-        .bg-environment {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(3vw, 4vh) scale(1.05); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.6;
-        }
-
-        .orb-1 {
-            width: 60vw; height: 60vw;
-            background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0) 70%);
-            top: -20vh; left: -10vw;
-            animation: drift 25s ease-in-out infinite;
-        }
-
-        .orb-2 {
-            width: 70vw; height: 50vw;
-            background: radial-gradient(ellipse, #a7f3d0 0%, rgba(167,243,208,0) 70%);
-            bottom: -15vh; right: -15vw;
-            animation: drift 30s ease-in-out infinite reverse;
-        }
-
-        /* Layout Architecture */
-        .app-container {
-            position: relative;
-            z-index: 1;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            padding: 1.5rem;
-            max-width: 1400px;
-            margin: 0 auto;
         }
 
-        /* Header Navigation */
-        .header-glass {
+        .title-bar {
+            background: linear-gradient(to right, #0A246A, #A6CAF0);
+            color: #FFFFFF;
+            /* White text */
+            padding: 4px 8px;
+            font-weight: bold;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background: rgba(255, 255, 255, 0.55);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            border-top: 1px solid var(--glass-highlight);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 2px 4px rgba(255, 255, 255, 0.6);
-            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #000000;
+            flex-shrink: 0;
         }
 
-        .brand-title {
-            font-size: 1.75rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
-            background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* Glossy Controls */
-        .gloss-btn {
-            background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(224,242,254,0.9) 100%);
-            border: 1px solid #7dd3fc;
-            padding: 0.6rem 1.25rem;
-            border-radius: 20px;
-            color: var(--accent-blue);
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05), inset 0 1px 0 #ffffff;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .gloss-btn:hover {
-            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15), inset 0 1px 0 #ffffff;
-            transform: translateY(-1px);
-        }
-
-        .gloss-btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%);
-        }
-
-        /* Mobile Tab Controls */
-        .tab-nav {
-            display: none;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 0.5rem;
-            border-radius: 16px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 1rem;
-        }
-
-        .tab-toggle {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-toggle.active {
-            background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 100%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 #ffffff;
-            color: var(--text-main);
-        }
-
-        /* Content Area */
-        .main-workspace {
+        .title-bar-button {
+            background-color: #C0C0C0;
+            border: 2px solid #FFFFFF;
+            border-right-color: #000000;
+            border-bottom-color: #000000;
+            width: 18px;
+            height: 18px;
             display: flex;
-            flex: 1;
-            gap: 1.5rem;
-            overflow: hidden;
-        }
-
-        .glass-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            border-top: 2px solid var(--glass-highlight);
-            border-left: 1px solid var(--glass-highlight);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            transition: opacity 0.3s ease;
-        }
-
-        .panel-titlebar {
-            padding: 1.25rem 1.5rem;
-            background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
-            border-bottom: 1px solid rgba(255,255,255,0.5);
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--accent-blue);
-            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 0.75rem;
+            font-size: 12px;
+            cursor: default;
+            color: #000000;
+            line-height: 1;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #7dd3fc, #0284c7);
-            box-shadow: 0 0 8px rgba(2, 132, 199, 0.5), inset 0 1px 2px #ffffff;
-        }
-
-        .panel-viewport {
-            flex: 1;
+        .content-box {
+            background-color: #FFFFFF;
+            /* White content area */
+            border: 2px solid #808080;
+            /* Sunken border effect */
+            border-top-color: #000000;
+            border-left-color: #000000;
+            padding: 16px;
+            flex-grow: 1;
             overflow-y: auto;
-            padding: 1.5rem;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 12px; }
-        ::-webkit-scrollbar-track { 
-            background: rgba(255, 255, 255, 0.2); 
-            border-radius: 10px; 
-            margin: 0.5rem;
-        }
-        ::-webkit-scrollbar-thumb { 
-            background: rgba(2, 132, 199, 0.25); 
-            border-radius: 10px; 
-            border: 3px solid transparent;
-            background-clip: padding-box;
-        }
-        ::-webkit-scrollbar-thumb:hover { 
-            background-color: rgba(2, 132, 199, 0.45); 
-        }
-
-        /* List Items & Categories */
-        .service-group {
-            margin-bottom: 1.5rem;
-            background: rgba(255, 255, 255, 0.35);
-            border-radius: 16px;
-            padding: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        .group-header {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--accent-blue);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-            padding-bottom: 0.5rem;
+        .section-header {
+            background-color: #C0C0C0;
+            border: 2px solid #FFFFFF;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            padding: 4px 8px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
         .list-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 0.85rem 1rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(240,249,255,0.85) 100%);
-            border-radius: 12px;
-            border: 1px solid #e0f2fe;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
+            flex-wrap: wrap;
+            padding: 4px 0;
+            border-bottom: 1px dotted #808080;
         }
 
-        .list-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(2, 132, 199, 0.08);
-            border-color: #bae6fd;
+        .list-item:last-child {
+            border-bottom: none;
         }
 
-        .item-details {
+        .list-item-title {
+            font-weight: bold;
+            flex-basis: 70%;
+        }
+
+        .list-item-price {
+            font-weight: normal;
+            text-align: right;
+            flex-basis: 30%;
+        }
+
+        .list-item.green-bg {
+            background-color: #90EE90;
+            border-top: 1px solid #D0FFD0;
+            border-left: 1px solid #D0FFD0;
+            border-right: 1px solid #6B8E23;
+            border-bottom: 1px solid #6B8E23;
+            padding: 3px;
+            margin: 2px 0;
+        }
+
+        .mobile-tabs {
+            display: none;
+            background-color: #C0C0C0;
+            border-bottom: 2px solid #808080;
+            padding: 4px 4px 0 4px;
+        }
+
+        .tab-btn {
+            background-color: #C0C0C0;
+            border: 2px solid #FFFFFF;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            padding: 6px 12px;
+            margin-right: 4px;
+            cursor: pointer;
+            border-bottom: none;
+            position: relative;
+            top: 2px;
+            font-weight: bold;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-btn.active {
+            background-color: #FFFFFF;
+            /* Active tab looks connected */
+            border-bottom: 2px solid #FFFFFF;
+            z-index: 10;
+        }
+
+        /* Layout Container */
+        .split-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .panel {
+            flex: 1;
+            height: 100%;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            overflow: hidden;
+            transition: flex-grow 0.3s;
         }
 
-        .item-title {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 0.95rem;
-        }
-
-        .item-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .item-price {
-            background: linear-gradient(180deg, #f8fafc 0%, #e0f2fe 100%);
-            color: var(--accent-blue);
-            padding: 0.4rem 0.85rem;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border: 1px solid #bae6fd;
-            box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0,0,0,0.05);
-            white-space: nowrap;
-            margin-left: 1rem;
-        }
-
-        /* Responsive Breakpoints */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .app-container {
-                padding: 0.75rem;
-            }
-            .header-glass {
-                padding: 1rem;
-                border-radius: 16px;
-            }
-            .tab-nav {
+            body {
+                overflow: hidden;
+                /* Keep body fixed, scroll inside panels */
                 display: flex;
+                flex-direction: column;
             }
-            .glass-panel {
+
+            .mobile-tabs {
+                display: flex;
+                flex-shrink: 0;
+            }
+
+            .split-container {
+                flex-direction: column;
+                height: auto;
+                flex-grow: 1;
+                overflow: hidden;
+            }
+
+            .panel {
                 display: none;
-                border-radius: 16px;
+                width: 100%;
+                height: 100%;
+                padding: 10px;
             }
-            .glass-panel.active {
+
+            .panel.active {
                 display: flex;
+            }
+
+            .list-item-title,
+            .list-item-price {
+                flex-basis: 100%;
+                text-align: left;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="bg-environment">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
+
+    <!-- Mobile Tabs -->
+    <div class="mobile-tabs" id="mobileTabs">
+        <button class="tab-btn" onclick="openTab('nintendo')" id="tab-nintendo">Nintendo Services</button>
+        <button class="tab-btn active" onclick="openTab('wbs')" id="tab-wbs">WBS Services</button>
     </div>
 
-    <div class="app-container">
-        <header class="header-glass">
-            <h1 class="brand-title">WBS Services</h1>
-            <button class="gloss-btn" onclick="alert('System Ready.')">Connect</button>
-        </header>
+    <div class="split-container">
 
-        <nav class="tab-nav">
-            <button class="tab-toggle active" onclick="switchTab('wbs')">General</button>
-            <button class="tab-toggle" onclick="switchTab('nintendo')">Nintendo</button>
-        </nav>
-
-        <main class="main-workspace">
-            <section id="wbs" class="glass-panel active">
-                <div class="panel-titlebar">
-                    <span class="status-indicator"></span>
-                    General Services
+        <!-- LEFT PANEL: Nintendo Services -->
+        <div id="nintendo" class="panel">
+            <div class="window-frame">
+                <div class="title-bar">
+                    <span class="text-sm">Nintendo Modding & Repair</span>
+                    <div class="flex space-x-1">
+                        <div class="title-bar-button">_</div>
+                        <div class="title-bar-button">□</div>
+                        <div class="title-bar-button">X</div>
+                    </div>
                 </div>
-                <div class="panel-viewport">
-                    
-                    <div class="service-group">
-                        <div class="group-header">Hardware Modifications</div>
-                        
-                        <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Screen Replacement</span>
-                                <span class="item-subtitle">High-fidelity IPS / OLED installation</span>
-                            </div>
-                            <span class="item-price">$45 + Parts</span>
+                <div class="content-box">
+                    <h1 class="text-2xl font-bold mb-4 text-center">Nintendo Services</h1>
+                    <p class="mb-4 text-center">
+                        Professional modding, repair, and upgrades for your Wii, 3DS, and DS consoles.
+                    </p>
+
+                    <div class="section-header">Nintendo Switch</div>
+                    <div class="mb-6">
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">Custom Firmware (Atmosphere)</span>
+                            <span class="list-item-price">$??</span>
+                            <p class="w-full text-sm ml-4 italic">V1 Unpatched, or Modchip installation (OLED/Lite/V2).
+                            </p>
                         </div>
-                        
                         <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Battery Upgrades</span>
-                                <span class="item-subtitle">Extended capacity lithium cells</span>
-                            </div>
-                            <span class="item-price">$30 + Parts</span>
+                            <span class="list-item-title">Joy-Con Drift Repair (Hall Effect Upgrade)</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Screen Replacement</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Battery Replacement</span>
+                            <span class="list-item-price">$?? + Parts</span>
                         </div>
                     </div>
 
-                    <div class="service-group">
-                        <div class="group-header">Custom Engineering</div>
-                        
-                        <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">USB-C Implementation</span>
-                                <span class="item-subtitle">Modern charging standard conversion</span>
-                            </div>
-                            <span class="item-price">$50 + Parts</span>
+                    <div class="section-header">Wii U Services</div>
+                    <div class="mb-6">
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">Tiramisu / Aroma CFW</span>
+                            <span class="list-item-price">$??</span>
                         </div>
-
                         <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Custom Shell Swaps</span>
-                                <span class="item-subtitle">Translucent aesthetics and fabrication</span>
-                            </div>
-                            <span class="item-price">$40 + Parts</span>
+                            <span class="list-item-title">Gamepad Screen Repair</span>
+                            <span class="list-item-price">$?? + Parts</span>
                         </div>
-                        
                         <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Custom Build Request</span>
-                                <span class="item-subtitle">W/ USB power bank</span>
-                            </div>
-                            <span class="item-price">$?? + Parts</span>
+                            <span class="list-item-title">Disc Drive Repair</span>
+                            <span class="list-item-price">$?? + Parts</span>
                         </div>
                     </div>
 
-                </div>
-            </section>
-
-            <section id="nintendo" class="glass-panel">
-                <div class="panel-titlebar">
-                    <span class="status-indicator" style="background: linear-gradient(135deg, #a7f3d0, #10b981); box-shadow: 0 0 8px rgba(16, 185, 129, 0.5), inset 0 1px 2px #ffffff;"></span>
-                    Nintendo Handhelds
-                </div>
-                <div class="panel-viewport">
-                    
-                    <div class="service-group">
-                        <div class="group-header">Game Boy Advance</div>
-                        
-                        <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">IPS Laminated Screen</span>
-                                <span class="item-subtitle">Zero dust, perfect alignment</span>
-                            </div>
-                            <span class="item-price">$60 + Parts</span>
+                    <div class="section-header">Wii Services</div>
+                    <div class="mb-6">
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">Wii Softmod / Homebrew</span>
+                            <span class="list-item-price">$??</span>
                         </div>
-                        
                         <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Audio Amplifier</span>
-                                <span class="item-subtitle">CleanPower filtering and speaker upgrade</span>
-                            </div>
-                            <span class="item-price">$35 + Parts</span>
+                            <span class="list-item-title">Disc Drive Replacement</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">HDMI Mod Installation</span>
+                            <span class="list-item-price">$?? + Parts</span>
                         </div>
                     </div>
 
-                    <div class="service-group">
-                        <div class="group-header">Dual Screen Systems</div>
-                        
-                        <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Top Screen Assembly</span>
-                                <span class="item-subtitle">DS / 3DS upper display replacement</span>
-                            </div>
-                            <span class="item-price">$75 + Parts</span>
+                    <div class="section-header">3DS / DS Family</div>
+                    <div class="mb-6">
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">3DS Custom Firmware (CFW)</span>
+                            <span class="list-item-price">$??</span>
                         </div>
-                        
                         <div class="list-item">
-                            <div class="item-details">
-                                <span class="item-title">Hardware Capture Board</span>
-                                <span class="item-subtitle">Direct uncompressed video output</span>
-                            </div>
-                            <span class="item-price">$120 + Parts</span>
+                            <span class="list-item-title">Screen Replacement (Top/Bottom)</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Charge Port Repair</span>
+                            <span class="list-item-price">$??</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Button / Stick Repair</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Portable charging dock W/ USB power bank</span>
+                            <span class="list-item-price">$?? + Parts</span>
                         </div>
                     </div>
 
+                    <div class="section-header">Other Nintendo Consoles (NES, SNES, N64, GC, GB/A)</div>
+                    <div class="mb-6">
+                        <div class="list-item">
+                            <span class="list-item-title">General Cleaning & Refurbishment</span>
+                            <span class="list-item-price">$??</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Capacitor Replacement (Recap)</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Cartridge Battery Replacement</span>
+                            <span class="list-item-price">$??</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">GB/GBA IPS Screen Mods</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">GameCube Picoboot / HDMI Mods</span>
+                            <span class="list-item-price">$?? + Parts</span>
+                        </div>
+                    </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: WBS Services (Original Content) -->
+        <div id="wbs" class="panel active">
+            <div class="window-frame">
+                <div class="title-bar">
+                    <span class="text-sm">WBS Services... information</span>
+                    <div class="flex space-x-1">
+                        <div class="title-bar-button">_</div>
+                        <div class="title-bar-button">□</div>
+                        <div class="title-bar-button">X</div>
+                    </div>
+                </div>
+                <div class="content-box">
+                    <h1 class="text-2xl font-bold mb-4 text-center">Welcome to WBS Services.</h1>
+
+                    <p class="mb-4 text-center">
+                        Your go-to source for... PC maintenance, repair, upgrades, or Nintendo modding and repair
+                        services! We provide reliable and efficient at the best value.
+                    </p>
+
+                    <p class="text-sm text-black text-right mb-2">
+                        We also provide remote access support!
+                    </p>
+
+                    <div class="section-header">
+                        Our Services
+                    </div>
+                    <div class="mb-6">
+                        <div class="list-item">
+                            <span class="list-item-title">Computer repair</span>
+                            <span class="list-item-price">Cost of Parts + $?? labor*</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Hardware troubleshooting</span>
+                            <span class="list-item-price">$?? per hour, no other costs</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">General maintenance</span>
+                            <span class="list-item-price">$?? overall.**</span>
+                            <p class="w-full text-sm ml-4 italic">Includes cleaning, minor organization of internals.
+                            </p>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Advanced maintenance</span>
+                            <span class="list-item-price">$?? overall.</span>
+                            <p class="w-full text-sm ml-4 italic">Thorough cleaning, thermal paste replacement, cable
+                                management.</p>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">New Computer Assembly</span>
+                            <span class="list-item-price">$?? overall. No other costs.</span>
+                            <p class="w-full text-sm ml-4 italic">MUST HAVE PARTS AND DEVICE. Includes connection of
+                                HDMI screens, mouse, keyboard, routing the cables.</p>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Device Upgrades</span>
+                            <span class="list-item-price">Cost of upgrade + $??</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Device Custom Manufacturing</span>
+                            <span class="list-item-price">Cost of parts + $??</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Parts Research</span>
+                            <span class="list-item-price">$??</span>
+                            <p class="w-full text-sm ml-4 italic">We find you the best parts for your needs.</p>
+                        </div>
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">Complete Microslop Office Suite</span>
+                            <span class="list-item-price">$??</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Windows 10, 11 Home</span>
+                            <span class="list-item-price">$?? (Standard Windows.)</span>
+                        </div>
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">Windows 10, 11 Pro</span>
+                            <span class="list-item-price">$?? (More features)</span>
+                        </div>
+                        <div class="list-item">
+                            <span class="list-item-title">Windows 10, 11 Enterprise</span>
+                            <span class="list-item-price">$?? (Most don't need this)</span>
+                        </div>
+                        <div class="list-item green-bg">
+                            <span class="list-item-title">Windows 11 Performance</span>
+                            <span class="list-item-price">$?? (For older computers)</span>
+                        </div>
+                        <p class="text-red-600 font-bold mt-2">85% off from Microslop's Prices! Applies to all Windows
+                            10/11 versions listed.</p>
+                    </div>
+
+                    <div class="section-header">
+                        Important Notes
+                    </div>
+                    <ul class="list-disc pl-5 mb-6 text-sm">
+                        <li>* If we have recycled parts on hand, those are available at a variable discount.</li>
+                        <li>** If you order General and your device is absolutely disgusting (covered in hair and
+                            grime), you will be charged $?? extra. But we will service it!</li>
+                        <li>We don't markup prices on parts, we just charge for the work.</li>
+                        <li>Some terms and prices negotiable.</li>
+                    </ul>
+
+                    <div class="section-header">
+                        Contact Us
+                    </div>
+                    <p class="mb-4">
+                        For any questions or to place an order, please feel free to reach out to us!
+                    </p>
+                    <p class="mb-2">
+                        <strong>Email:</strong> <a href="mailto:wackyboxinc@gmail.com"
+                            class="text-blue-700 underline">wackyboxinc@gmail.com</a>
+                    </p>
+                    <p class="mb-4">
+                        <strong>Phone:</strong> <a href="tel:+19718991425"
+                            class="text-blue-700 underline">971-899-1425</a>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        function switchTab(tabId) {
-            if (window.innerWidth <= 768) {
-                // Mobile layout: Display one panel at a time
-                document.querySelectorAll('.glass-panel').forEach(panel => {
-                    panel.classList.remove('active');
-                });
-                document.getElementById(tabId).classList.add('active');
+        function openTab(tabName) {
+            // Only active on mobile
+            if (window.innerWidth > 768) return;
 
-                // Update styling for navigation buttons
-                document.querySelectorAll('.tab-toggle').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                event.currentTarget.classList.add('active');
-            }
+            // Hide all panels
+            const panels = document.querySelectorAll('.panel');
+            panels.forEach(panel => panel.classList.remove('active'));
+
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected panel
+            document.getElementById(tabName).classList.add('active');
+
+            // Activate selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
         }
 
+        // Handle resize events to ensure correct display
         window.addEventListener('resize', () => {
+            const wbsPanel = document.getElementById('wbs');
+            const nintendoPanel = document.getElementById('nintendo');
+
             if (window.innerWidth > 768) {
-                // Desktop layout: Always show both panels
-                document.querySelectorAll('.glass-panel').forEach(panel => {
-                    panel.classList.add('active');
-                });
+                // Determine active view for Desktop: Show both
+                wbsPanel.classList.add('active'); //  flex handles display on desktop via CSS
+                nintendoPanel.classList.add('active'); // Actually CSS 'display:none' applies to .panel only on mobile query
+
+                
             } else {
-                // Switching from desktop to mobile: Ensure only one is active to prevent stacking
-                const activePanels = document.querySelectorAll('.glass-panel.active');
-                if (activePanels.length !== 1) {
-                    document.querySelectorAll('.glass-panel').forEach(panel => panel.classList.remove('active'));
-                    document.getElementById('wbs').classList.add('active');
-                    
-                    document.querySelectorAll('.tab-toggle').forEach(btn => btn.classList.remove('active'));
-                    document.querySelector('.tab-toggle').classList.add('active');
+                // If resizing to mobile, ensure one is active.
+                if (!document.querySelector('.panel.active')) {
+                    openTab('wbs'); // Default to WBS
                 }
             }
         });
 
-        // Lifecycle init validation
-        if (window.innerWidth > 768) {
-            document.querySelectorAll('.glass-panel').forEach(panel => {
-                panel.classList.add('active');
-            });
+        // Initialize default tab on mobile load if needed
+        if (window.innerWidth <= 768) {
+            // WBS is active by default in HTML
         }
     </script>
 </body>
+
 </html>
