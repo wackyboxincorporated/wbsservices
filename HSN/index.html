@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Velvet Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Limelight&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <canvas id="bg-gradient-canvas" data-transition-in=""></canvas>
+    <header class="site-header">
+        <nav class="main-nav">
+            <a href="index.html">HOME</a>
+            <a href="#shop">SHOP</a>
+            <a href="contact.html">CONTACT US</a>
+            <a href="who-we-are.html">WHO WE ARE</a>
+            <a href="#zine">THE VELVET ZINE</a>
+        </nav>
+        <div class="logo">The Velvet Salon</div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="carousel">
+                <button class="carousel-btn prev-btn" aria-label="Previous image">&#10094;</button>
+                <button class="carousel-btn next-btn" aria-label="Next image">&#10095;</button>
+                <div class="carousel-track">
+                    <div class="carousel-slide active">
+                        <img src="https://static.wixstatic.com/media/966424_a7bf42edc4084cf0a8120af259aa9f85~mv2.jpeg/v1/fit/w_1080,h_863,q_90,enc_avif,quality_auto/966424_a7bf42edc4084cf0a8120af259aa9f85~mv2.jpeg" alt="Salon detail" />
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://static.wixstatic.com/media/966424_e067b0d1f1734660a0beaba161be4368~mv2.jpeg/v1/fit/w_925,h_863,q_90,enc_avif,quality_auto/966424_e067b0d1f1734660a0beaba161be4368~mv2.jpeg" alt="Styling process" />
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://static.wixstatic.com/media/966424_28c730418e7643f7a316e2e7ff95789d~mv2.jpeg/v1/fit/w_1080,h_863,q_90,enc_avif,quality_auto/966424_28c730418e7643f7a316e2e7ff95789d~mv2.jpeg" alt="Vintage interior" />
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://static.wixstatic.com/media/966424_4e2467c27d464bfeb1982ef895d366b2~mv2.jpeg/v1/fit/w_858,h_863,q_90,enc_avif,quality_auto/966424_4e2467c27d464bfeb1982ef895d366b2~mv2.jpeg" alt="Owner portrait" />
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://static.wixstatic.com/media/966424_6c70a59e56024a93bc9494447d9a1c50~mv2.jpeg/v1/fit/w_1080,h_863,q_90,enc_avif,quality_auto/966424_6c70a59e56024a93bc9494447d9a1c50~mv2.jpeg" alt="Hair details" />
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://static.wixstatic.com/media/966424_e91024bfdc594a5da0f1ebf039bddb03~mv2.jpeg/v1/fit/w_1080,h_863,q_90,enc_avif,quality_auto/966424_e91024bfdc594a5da0f1ebf039bddb03~mv2.jpeg" alt="Salon atmosphere" />
+                    </div>
+                </div>
+            </div>
+            <div class="hero-content fade-in">
+                <h1 class="motto">
+                    If you’re here, maybe it’s time to feel taken care of — even just a little more than usual.
+                </h1>
+                <div class="flavor-words">
+                    <span>Bespoke Hair</span>
+                    <span class="dot">•</span>
+                    <span>Intuitively Crafted</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="location-section section-padding fade-in" id="location">
+            <h2 class="section-title">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 0.25rem;translate: 0 -.4rem;">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg> Map us at 809 W Main St. Ste E, Monroe, WA
+            </h2>
+            <div class="iframe-container">
+                <iframe title="Google Maps" width="100%" height="450" style="border:0;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2682.0252119106093!2d-121.98394632360216!3d47.85871316938637!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x549aaa8ff5555555%3A0x868db2bc89faee3!2s809%20W%20Main%20St%20Ste%20E%2C%20Monroe%2C%20WA%2098272!5e0!3m2!1sen!2sus!4v1709940000000!5m2!1sen!2sus"></iframe>
+            </div>
+        </section>
+
+        <section class="segue-contact fade-in">
+            <div class="segue-content">
+                <h2>Ready to shift your energy?</h2>
+                <p>
+                    Reach out to us directly to begin your journey, or explore our tailored offerings.
+                </p>
+                <a href="contact.html" class="btn-primary">Contact Us</a>
+            </div>
+        </section>
+
+        <section class="reviews-section section-padding fade-in" id="reviews">
+            <h2 class="section-title">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 0.25rem;    translate: 0 -.4rem;">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg> What Our Customers Say
+            </h2>
+            <div id="reviews-container" class="reviews-grid">
+                <div class="review-card fade-in">
+                    <div class="stars">★★★★★</div>
+                    <div class="review-text">"My most favorite place to get my hair done. I don't trust anyone with my hair like I do with Cee Jae. She is one of a kind, genuine, and delivers every time with the vision I have in mind. I have never been one to feel happy with
+                        my hair appointments until meeting Cee Jae two years ago, and I've never looked back. If I could give 100 stars I would. &lt;3"</div>
+                    <a href="https://maps.app.goo.gl/4dfr38b64qyCumym7" target="_blank" rel="noopener" class="review-author">— Stella Bracken</a
+              >
+            </div>
+            <div class="review-card fade-in">
+              <div class="stars">★★★★★</div>
+              <div class="review-text">"I recently experienced the Reset Scalp Massage Ritual with CJ at Velvet Salon, and it was absolutely amazing. She showed me how my scalp looked like before and after the treatment with a microscope, and the difference was incredible. I had been dealing with irritation and dandruff for a while, nothing I tried helped and after the treatment today my scalp feels so much better! It’s completely refreshed.
+  
+  CJ is so knowledgeable about holistic Ayurvedic practices, which made the whole experience feel personalized. She gave me so many helpful tips on how to take care of my scalp and hair, and I learned a lot from her. I now have a plan regimen of what I’ll do from now on. 😊
+  
+  I left feeling relaxed, renewed, and truly cared for. I’ll definitely be coming back and highly recommend CJ at the Velvet Salon to anyone who wants to reset their scalp and elevate their hair care experience!"</div>
+              <a
+                href="https://maps.app.goo.gl/e2iRLg77jvz1fW2F9"
+                target="_blank"
+                rel="noopener"
+                class="review-author"
+                >— Anna Abanes</a
+              >
+            </div>
+            <div class="review-card fade-in">
+              <div class="stars">★★★★★</div>
+              <div class="review-text">"CeeJae is an incredibly knowledgeable stylist! She takes the time to understand your hair needs and wants and explains the best way to achieve those goals. I’m so happy with my hair every time I leave!
+  CeeJae is also patient and kind. Conversations with her are always soul inspiring, something you don’t get from other stylists at least in my experience. I love that she uses organic products and supports sustainability.
+  And the best part when you get your hair done is the shampoo experiment and CeeJae goes above and beyond. The head massage is so relaxing that I’m sure I’ve fallen asleep before! Overall a top notch experience!
+  I highly recommend CeeJae and The Velvet Salon. Such a special and one of a kind hair experience!"</div>
+              <a
+                href="https://maps.app.goo.gl/zca5HBJYm5TSZBSR6"
+                target="_blank"
+                rel="noopener"
+                class="review-author"
+                >— Tina Anderson</a
+              >
+            </div>
+          </div>
+        <div class="reviews-actions">
+          <a
+            href="https://www.google.com/maps/place/The+Velvet+Salon/@47.852965,-121.9813225,17z/data=!3m1!4b1!4m6!3m5!1s0x549aa9845d2498fb:0x8d8a133782039c46!8m2!3d47.852965!4d-121.9813225!16s%2Fg%2F11tj73nmvk?entry=ttu&g_ep=EgoyMDI2MDMwNS4wIKXMDSoASAFQAw%3D%3D"
+            target="_blank"
+            rel="noopener"
+            class="btn-primary"
+          >
+            View More Reviews
+          </a>
+                </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="social-links">
+            <a href="https://www.instagram.com/myvelvetsalon" target="_blank" rel="noopener">
+          Instagram
+        </a>
+            <a href="https://www.facebook.com/ceejae.torrez/" target="_blank" rel="noopener">
+          Facebook
+        </a>
+        </div>
+        <p class="copyright">© The Velvet Salon.</p>
+    </footer>
+
+    <script src="whatamesh.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>
