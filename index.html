@@ -1,519 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WBS Services</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="index.css">
-    <style>
-        body {
-            font-family: 'Unifont', 'MS Sans Serif', 'Fixedsys', 'Terminal', sans-serif;
-            background-color: #C0C0C0;
-            /* Windoze 99 theme */
-            color: #000000;
-            padding: 0;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            /* Prevent body scroll on desktop */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBS Services - Purchase order</title>
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+<style>
+    :root {
+        --win-bg: #1e1e1e;
+        --win-face: #2d2d2d;
+        --win-text: #f0f0f0;
+        --win-text-disabled: #555555;
+        --win-shadow-dark: #141414;
+        --win-shadow-light: #404040;
+        --win-hilite: #4a4a4a;
+        --win-title-bg: #000080;
+        --win-title-text: #ffffff;
+        --win-input-bg: #121212;
+    }
 
-        /* Scrollbar styling for that retro feel */
-        ::-webkit-scrollbar {
-            width: 16px;
-        }
+    /* System Font and Base Styles */
+    * {
+        box-sizing: border-box;
+        font-family: "MS Sans Serif", "Tahoma", "Segoe UI", sans-serif;
+        font-size: 11px;
+    }
 
-        ::-webkit-scrollbar-track {
-            background: #dfdfdf;
-        }
+    body {
+        background-color: var(--win-bg);
+        color: var(--win-text);
+        margin: 0;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+    }
 
-        ::-webkit-scrollbar-thumb {
-            background: #c0c0c0;
-            border: 2px solid #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-        }
+    /* Window Frame - Device Friendly Fluidity */
+    .window {
+        background-color: var(--win-face);
+        border-top: 1px solid var(--win-hilite);
+        border-left: 1px solid var(--win-hilite);
+        border-right: 1px solid var(--win-shadow-dark);
+        border-bottom: 1px solid var(--win-shadow-dark);
+        box-shadow: 1px 1px 0px 0px var(--win-shadow-light) inset, -1px -1px 0px 0px var(--win-shadow-dark) inset;
+        width: 100%;
+        max-width: 680px; /* Maximum desktop density */
+        padding: 2px;
+        transition: transform 0.2s ease-out;
+    }
 
-        .window-frame {
-            background-color: #C0C0C0;
-            border: 2px solid #FFFFFF;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            box-shadow: 1px 1px #000000;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
+    /* Fade-in window animation on load */
+    @keyframes windowInit {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .window { animation: windowInit 0.4s ease-out; }
 
-        .title-bar {
-            background: linear-gradient(to right, #0A246A, #A6CAF0);
-            color: #FFFFFF;
-            /* White text */
-            padding: 4px 8px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #000000;
-            flex-shrink: 0;
-        }
+    /* Title Bar */
+    .title-bar {
+        background: var(--win-title-bg);
+        color: var(--win-title-text);
+        padding: 3px 4px 3px 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
 
-        .title-bar-button {
-            background-color: #C0C0C0;
-            border: 2px solid #FFFFFF;
-            border-right-color: #000000;
-            border-bottom-color: #000000;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            cursor: default;
-            color: #000000;
-            line-height: 1;
-        }
+    .title-bar-text {
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-        .content-box {
-            background-color: #FFFFFF;
-            /* White content area */
-            border: 2px solid #808080;
-            /* Sunken border effect */
-            border-top-color: #000000;
-            border-left-color: #000000;
-            padding: 16px;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
+    .title-bar-controls button {
+        width: 16px;
+        height: 14px;
+        background-color: var(--win-face);
+        border-top: 1px solid var(--win-hilite);
+        border-left: 1px solid var(--win-hilite);
+        border-right: 1px solid var(--win-shadow-dark);
+        border-bottom: 1px solid var(--win-shadow-dark);
+        color: var(--win-text);
+        font-size: 9px;
+        font-weight: bold;
+        line-height: 10px;
+        padding: 0;
+        text-align: center;
+        cursor: default;
+    }
 
-        .section-header {
-            background-color: #C0C0C0;
-            border: 2px solid #FFFFFF;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            padding: 4px 8px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+    /* Menu Bar */
+    .menu-bar {
+        display: flex;
+        padding: 2px 6px;
+        border-bottom: 1px solid var(--win-shadow-dark);
+        gap: 12px;
+    }
 
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            padding: 4px 0;
-            border-bottom: 1px dotted #808080;
-        }
+    .menu-item {
+        cursor: default;
+    }
 
-        .list-item:last-child {
-            border-bottom: none;
-        }
+    .window-body {
+        padding: 12px;
+    }
 
-        .list-item-title {
-            font-weight: bold;
-            flex-basis: 70%;
-        }
+    /* Layout Structure - Field Groups */
+    .field-group {
+        border-top: 1px solid var(--win-shadow-dark);
+        border-left: 1px solid var(--win-shadow-dark);
+        border-right: 1px solid var(--win-hilite);
+        border-bottom: 1px solid var(--win-hilite);
+        padding: 12px;
+        margin-bottom: 14px;
+        position: relative;
+    }
 
-        .list-item-price {
-            font-weight: normal;
-            text-align: right;
-            flex-basis: 30%;
-        }
+    .field-group-title {
+        position: absolute;
+        top: -6px;
+        left: 10px;
+        background-color: var(--win-face);
+        padding: 0 4px;
+    }
 
-        .list-item.green-bg {
-            background-color: #90EE90;
-            border-top: 1px solid #D0FFD0;
-            border-left: 1px solid #D0FFD0;
-            border-right: 1px solid #6B8E23;
-            border-bottom: 1px solid #6B8E23;
-            padding: 3px;
-            margin: 2px 0;
-        }
+    /* High Density Data Table - Optimized for Touch and Mobile */
+    .data-table-container {
+        width: 100%;
+        overflow-x: auto; /* Required for small screens */
+        background-color: var(--win-input-bg);
+        border-top: 1px solid var(--win-shadow-dark);
+        border-left: 1px solid var(--win-shadow-dark);
+        border-right: 1px solid var(--win-hilite);
+        border-bottom: 1px solid var(--win-hilite);
+        margin-bottom: 4px;
+    }
 
-        .mobile-tabs {
-            display: none;
-            background-color: #C0C0C0;
-            border-bottom: 2px solid #808080;
-            padding: 4px 4px 0 4px;
-        }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 500px; /* Prevents extreme compression */
+    }
 
-        .tab-btn {
-            background-color: #C0C0C0;
-            border: 2px solid #FFFFFF;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            padding: 6px 12px;
-            margin-right: 4px;
-            cursor: pointer;
-            border-bottom: none;
-            position: relative;
-            top: 2px;
-            font-weight: bold;
-            border-radius: 3px 3px 0 0;
-        }
+    .data-table th {
+        background-color: var(--win-face);
+        text-align: left;
+        padding: 4px 6px;
+        font-weight: normal;
+        border-right: 1px solid var(--win-shadow-dark);
+        border-bottom: 1px solid var(--win-shadow-dark);
+        box-shadow: 1px 1px 0px 0px var(--win-hilite) inset;
+        white-space: nowrap;
+    }
 
-        .tab-btn.active {
-            background-color: #FFFFFF;
-            /* Active tab looks connected */
-            border-bottom: 2px solid #FFFFFF;
-            z-index: 10;
-        }
+    .data-table td {
+        padding: 8px 6px; /* Increased padding for touch targets */
+        cursor: default;
+        line-height: 14px;
+        vertical-align: top;
+        transition: background-color 0.1s;
+    }
 
-        /* Layout Container */
-        .split-container {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-        }
+    .data-table tr {
+        border-bottom: 1px solid #252525;
+    }
 
-        .panel {
-            flex: 1;
-            height: 100%;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: flex-grow 0.3s;
-        }
+    /* Native-style selection animation/state */
+    .data-table tr.selected {
+        background-color: var(--win-title-bg);
+        color: var(--win-title-text);
+    }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            body {
-                overflow: hidden;
-                /* Keep body fixed, scroll inside panels */
-                display: flex;
-                flex-direction: column;
-            }
+    /* Subtle hover for touch/mouse feedback */
+    .data-table tr:not(.selected):hover {
+        background-color: #353535;
+    }
 
-            .mobile-tabs {
-                display: flex;
-                flex-shrink: 0;
-            }
+    /* Status Panel - Animation Host */
+    .status-panel {
+        background-color: var(--win-input-bg);
+        border-top: 1px solid var(--win-shadow-dark);
+        border-left: 1px solid var(--win-shadow-dark);
+        border-right: 1px solid var(--win-hilite);
+        border-bottom: 1px solid var(--win-hilite);
+        padding: 8px;
+        margin-top: 10px;
+        min-height: 50px;
+        position: relative;
+        overflow: hidden;
+    }
 
-            .split-container {
-                flex-direction: column;
-                height: auto;
-                flex-grow: 1;
-                overflow: hidden;
-            }
+    /* The 'processing' rolling animation */
+    @keyframes statusRoll {
+        0% { transform: translateY(0); opacity: 1; }
+        50% { transform: translateY(-2px); opacity: 0.8; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+    .status-active {
+        animation: statusRoll 1.5s infinite ease-in-out;
+    }
 
-            .panel {
-                display: none;
-                width: 100%;
-                height: 100%;
-                padding: 10px;
-            }
-
-            .panel.active {
-                display: flex;
-            }
-
-            .list-item-title,
-            .list-item-price {
-                flex-basis: 100%;
-                text-align: left;
-            }
-        }
-    </style>
+    /* Container for PayPal - fluid width */
+    #paypal-button-container {
+        margin-top: 10px;
+        width: 100%;
+        min-height: 150px; /* Account for SDK load */
+    }
+    
+    /* Responsive adjustment for extra small screens */
+    @media (max-width: 480px) {
+        .window-body { padding: 8px; }
+        .field-group { padding: 10px 8px; }
+        .data-table td { padding: 10px 6px; }
+    }
+</style>
 </head>
-
 <body>
 
-    <!-- Mobile Tabs -->
-    <div class="mobile-tabs" id="mobileTabs">
-        <button class="tab-btn" onclick="openTab('nintendo')" id="tab-nintendo">Nintendo Services</button>
-        <button class="tab-btn active" onclick="openTab('wbs')" id="tab-wbs">WBS Services</button>
+<div class="window">
+    <div class="title-bar">
+        <div class="title-bar-text">WBS Services - Product purchase order</div>
+        <div class="title-bar-controls">
+            <button aria-label="Minimize">_</button>
+            <button aria-label="Maximize">[]</button>
+            <button aria-label="Close">X</button>
+        </div>
+    </div>
+    
+    <div class="menu-bar">
+        <div class="menu-item">File</div>
+        <div class="menu-item">Properties</div>
+        <div class="menu-item">Help</div>
     </div>
 
-    <div class="split-container">
-
-        <!-- LEFT PANEL: Nintendo Services -->
-        <div id="nintendo" class="panel">
-            <div class="window-frame">
-                <div class="title-bar">
-                    <span class="text-sm">Nintendo Modding & Repair</span>
-                    <div class="flex space-x-1">
-                        <div class="title-bar-button">_</div>
-                        <div class="title-bar-button">□</div>
-                        <div class="title-bar-button">X</div>
-                    </div>
-                </div>
-                <div class="content-box">
-                    <h1 class="text-2xl font-bold mb-4 text-center">Nintendo Services</h1>
-                    <p class="mb-4 text-center">
-                        Professional modding, repair, and upgrades for your Wii, 3DS, and DS consoles.
-                    </p>
-
-                    <div class="section-header">Nintendo Switch</div>
-                    <div class="mb-6">
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">Custom Firmware (Atmosphere)</span>
-                            <span class="list-item-price">$??</span>
-                            <p class="w-full text-sm ml-4 italic">V1 Unpatched, or Modchip installation (OLED/Lite/V2).
-                            </p>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Joy-Con Drift Repair (Hall Effect Upgrade)</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Screen Replacement</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Battery Replacement</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                    </div>
-
-                    <div class="section-header">Wii U Services</div>
-                    <div class="mb-6">
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">Tiramisu / Aroma CFW</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Gamepad Screen Repair</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Disc Drive Repair</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                    </div>
-
-                    <div class="section-header">Wii Services</div>
-                    <div class="mb-6">
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">Wii Softmod / Homebrew</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Disc Drive Replacement</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">HDMI Mod Installation</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                    </div>
-
-                    <div class="section-header">3DS / DS Family</div>
-                    <div class="mb-6">
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">3DS Custom Firmware (CFW)</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Screen Replacement (Top/Bottom)</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Charge Port Repair</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Button / Stick Repair</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Portable charging dock W/ USB power bank</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                    </div>
-
-                    <div class="section-header">Other Nintendo Consoles (NES, SNES, N64, GC, GB/A)</div>
-                    <div class="mb-6">
-                        <div class="list-item">
-                            <span class="list-item-title">General Cleaning & Refurbishment</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Capacitor Replacement (Recap)</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Cartridge Battery Replacement</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">GB/GBA IPS Screen Mods</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">GameCube Picoboot / HDMI Mods</span>
-                            <span class="list-item-price">$?? + Parts</span>
-                        </div>
-                    </div>
-                </div>
+    <div class="window-body">
+        <div class="field-group">
+            <div class="field-group-title">Available items (Select one row to configure hardware choice)</div>
+            <div class="data-table-container">
+                <table class="data-table" id="productTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 65%;">Product configuration details</th>
+                            <th style="width: 20%;">Item hardware</th>
+                            <th style="width: 15%;">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="selected" 
+                            data-id="WACKNET-HANDHELD" 
+                            data-price="110.00" 
+                            data-desc="WackNet Handheld (Pre-assembled, 3D-printed enclosure, production firmware and source code)">
+                            <td>WackNet handheld device. Comes pre-assembled in a proper 3D-printed enclosure. Includes all parts necessary and is the production hardware. Firmware pre-installed (includes source code!) and configured.</td>
+                            <td style="white-space: nowrap;">WackNet handheld</td>
+                            <td style="font-weight: bold;">$110.00</td>
+                        </tr>
+                        <tr data-id="WACKNET-BUNDLE" 
+                            data-price="200.00" 
+                            data-desc="WackNet Handheld + Base Station Bundle (Pre-assembled, 3D-printed enclosures, production firmware and source code)">
+                            <td>WackNet handheld unit plus base station bundle. Pre-assembled in standalone proper 3D-printed enclosures. Production hardware configurations include firmware and source code distributions.</td>
+                            <td style="white-space: nowrap;">Handheld + base</td>
+                            <td style="font-weight: bold;">$200.00</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- RIGHT PANEL: WBS Services (Original Content) -->
-        <div id="wbs" class="panel active">
-            <div class="window-frame">
-                <div class="title-bar">
-                    <span class="text-sm">WBS Services... information</span>
-                    <div class="flex space-x-1">
-                        <div class="title-bar-button">_</div>
-                        <div class="title-bar-button">□</div>
-                        <div class="title-bar-button">X</div>
-                    </div>
-                </div>
-                <div class="content-box">
-                    <h1 class="text-2xl font-bold mb-4 text-center">Welcome to WBS Services.</h1>
+        <div class="field-group">
+            <div class="field-group-title">Secure transaction execution</div>
+            <p style="margin: 0 0 8px 0; line-height: 14px;">
+                Highlight the desired inventory hardware bundle from the grid array above, then initialize verification. Shipping variables and transaction validation rules are collected directly via the secure window interface. Your money is protected. A guarantee is made to all customers that any information can be recieved within 6 hours of inquiry at wackyboxinc@gmail.com. Feel free to ask for anything about the product at all. Product images are coming to this purchase page too, but you can ask for those if you want them. Thanks <3
+            </p>
+            
+            <div id="paypal-button-container"></div>
+        </div>
 
-                    <p class="mb-4 text-center">
-                        Your go-to source for... PC maintenance, repair, upgrades, or Nintendo modding and repair
-                        services! We provide reliable and efficient at the best value.
-                    </p>
-
-                    <p class="text-sm text-black text-right mb-2">
-                        We also provide remote access support!
-                    </p>
-
-                    <div class="section-header">
-                        Our Services
-                    </div>
-                    <div class="mb-6">
-                        <div class="list-item">
-                            <span class="list-item-title">Computer repair</span>
-                            <span class="list-item-price">Cost of Parts + $?? labor*</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Hardware troubleshooting</span>
-                            <span class="list-item-price">$?? per hour, no other costs</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">General maintenance</span>
-                            <span class="list-item-price">$?? overall.**</span>
-                            <p class="w-full text-sm ml-4 italic">Includes cleaning, minor organization of internals.
-                            </p>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Advanced maintenance</span>
-                            <span class="list-item-price">$?? overall.</span>
-                            <p class="w-full text-sm ml-4 italic">Thorough cleaning, thermal paste replacement, cable
-                                management.</p>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">New Computer Assembly</span>
-                            <span class="list-item-price">$?? overall. No other costs.</span>
-                            <p class="w-full text-sm ml-4 italic">MUST HAVE PARTS AND DEVICE. Includes connection of
-                                HDMI screens, mouse, keyboard, routing the cables.</p>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Device Upgrades</span>
-                            <span class="list-item-price">Cost of upgrade + $??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Device Custom Manufacturing</span>
-                            <span class="list-item-price">Cost of parts + $??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Parts Research</span>
-                            <span class="list-item-price">$??</span>
-                            <p class="w-full text-sm ml-4 italic">We find you the best parts for your needs.</p>
-                        </div>
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">Complete Microslop Office Suite</span>
-                            <span class="list-item-price">$??</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Windows 10, 11 Home</span>
-                            <span class="list-item-price">$?? (Standard Windows.)</span>
-                        </div>
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">Windows 10, 11 Pro</span>
-                            <span class="list-item-price">$?? (More features)</span>
-                        </div>
-                        <div class="list-item">
-                            <span class="list-item-title">Windows 10, 11 Enterprise</span>
-                            <span class="list-item-price">$?? (Most don't need this)</span>
-                        </div>
-                        <div class="list-item green-bg">
-                            <span class="list-item-title">Windows 11 Performance</span>
-                            <span class="list-item-price">$?? (For older computers)</span>
-                        </div>
-                        <p class="text-red-600 font-bold mt-2">85% off from Microslop's Prices! Applies to all Windows
-                            10/11 versions listed.</p>
-                    </div>
-
-                    <div class="section-header">
-                        Important Notes
-                    </div>
-                    <ul class="list-disc pl-5 mb-6 text-sm">
-                        <li>* If we have recycled parts on hand, those are available at a variable discount.</li>
-                        <li>** If you order General and your device is absolutely disgusting (covered in hair and
-                            grime), you will be charged $?? extra. But we will service it!</li>
-                        <li>We don't markup prices on parts, we just charge for the work.</li>
-                        <li>Some terms and prices negotiable.</li>
-                    </ul>
-
-                    <div class="section-header">
-                        Contact Us
-                    </div>
-                    <p class="mb-4">
-                        For any questions or to place an order, please feel free to reach out to us!
-                    </p>
-                    <p class="mb-2">
-                        <strong>Email:</strong> <a href="mailto:wackyboxinc@gmail.com"
-                            class="text-blue-700 underline">wackyboxinc@gmail.com</a>
-                    </p>
-                    <p class="mb-4">
-                        <strong>Phone:</strong> <a href="tel:+19718991425"
-                            class="text-blue-700 underline">971-899-1425</a>
-                    </p>
-                </div>
-            </div>
+        <div class="field-group">
+            <div class="field-group-title">Dark rectangular status area</div>
+            <div id="statusLog" class="status-panel">Awaiting transaction initialization. Hardware target selected: WackNet handheld ($110.00).</div>
         </div>
     </div>
+</div>
 
-    <script>
-        function openTab(tabName) {
-            // Only active on mobile
-            if (window.innerWidth > 768) return;
-
-            // Hide all panels
-            const panels = document.querySelectorAll('.panel');
-            panels.forEach(panel => panel.classList.remove('active'));
-
-            // Deactivate all tabs
-            const tabs = document.querySelectorAll('.tab-btn');
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            // Show selected panel
-            document.getElementById(tabName).classList.add('active');
-
-            // Activate selected tab
-            document.getElementById('tab-' + tabName).classList.add('active');
+<script>
+    // tion)
+    const statusLog = document.getElementById('statusLog');
+    
+    function updateTerminal(message, isProcessing = false) {
+        statusLog.innerText = message;
+        if (isProcessing) {
+            statusLog.classList.add('status-active');
+        } else {
+            statusLog.classList.remove('status-active');
         }
+    }
 
-        // Handle resize events to ensure correct display
-        window.addEventListener('resize', () => {
-            const wbsPanel = document.getElementById('wbs');
-            const nintendoPanel = document.getElementById('nintendo');
+    // Global variable configuration tracking the selected hardware configuration array
+    let currentSelection = {
+        id: "WACKNET-HANDHELD",
+        price: "110.00",
+        desc: "WackNet Handheld (Pre-assembled, 3D-printed enclosure, production firmware and source code)"
+    };
 
-            if (window.innerWidth > 768) {
-                // Determine active view for Desktop: Show both
-                wbsPanel.classList.add('active'); //  flex handles display on desktop via CSS
-                nintendoPanel.classList.add('active'); // Actually CSS 'display:none' applies to .panel only on mobile query
-
-                
-            } else {
-                // If resizing to mobile, ensure one is active.
-                if (!document.querySelector('.panel.active')) {
-                    openTab('wbs'); // Default to WBS
-                }
-            }
+    // Table row grid interaction routing logic (optimized for touch)
+    const rows = document.querySelectorAll('#productTable tbody tr');
+    rows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Apply native Win32 single-selection behavior
+            rows.forEach(r => r.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            // Map data attributes to global configuration
+            currentSelection.id = this.getAttribute('data-id');
+            currentSelection.price = this.getAttribute('data-price');
+            currentSelection.desc = this.getAttribute('data-desc');
+            
+            // Update terminal status (no animation on simple selection)
+            updateTerminal(`Selection altered. Hardware target selected: ${this.cells[1].innerText} ($${currentSelection.price}).`);
         });
+    });
 
-        // Initialize default tab on mobile load if needed
-        if (window.innerWidth <= 768) {
-            // WBS is active by default in HTML
+    // Initialize the checkout tracking logic link mapping
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color:  'blue',
+            shape:  'rect',
+            label:  'checkout'
+        },
+        createOrder: function(data, actions) {
+            // Activate processing animation
+            updateTerminal(`Generating payload for ${currentSelection.id}...`, true);
+            
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        currency_code: 'USD',
+                        value: currentSelection.price
+                    },
+                    description: currentSelection.desc,
+                    payee: {
+                        email_address: 'gallsheetsbox@gmail.com'
+                    }
+                }],
+                application_context: {
+                    // Force PayPal to gather shipping data on their secure screen
+                    shipping_preference: 'GET_FROM_FILE'
+                }
+            });
+        },
+        onApprove: function(data, actions) {
+            updateTerminal("Transaction authorized. Capturing funds...", true);
+            
+            return actions.order.capture().then(function(details) {
+                const buyerName = details.payer.name.given_name;
+                // Deactivate animation on completion
+                updateTerminal(`Transaction complete. Thank you ${buyerName}. Order reference: ${details.id}. Hardware assignment logged.`, false);
+                
+                // Final design touch: subtle border animation on success
+                document.querySelector('.window').style.border = '2px solid #00ff00';
+                setTimeout(() => document.querySelector('.window').style.border = '', 1000);
+            });
+        },
+        onCancel: function (data) {
+            // Abort animation
+            updateTerminal("Transaction sequence aborted by user.", false);
+        },
+        onError: function (err) {
+            // Critical failure status
+            updateTerminal("System error encountered during transaction execution pipeline.", false);
+            statusLog.style.color = '#ff4444'; // Subtle red error text in terminal
+            console.error(err);
         }
-    </script>
-</body>
+    }).render('#paypal-button-container');
+</script>
 
+</body>
 </html>
