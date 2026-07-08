@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallowa Rec</title>
+  <meta name="description" content="A premium, performant, and natural procedural meadow simulation and horizontal slide presentation.">
+  <style>
+    /* Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@500;700&display=swap');
+
+    :root {
+      --earth-sand: #fbfaf5;
+      --earth-linen: #eae3cc;
+      --earth-border: #bcae91;
+      --meadow-sage: #50785c;
+      --text-main: #16221a;
+      --text-muted: #435248;
+      --font-caps: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Reset & Core Setup */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-x: hidden;
+      background-color: var(--earth-linen);
+    }
+
+    @media (min-width: 640px) {
+      body {
+        padding: 1.5rem;
+      }
+    }
+    @media (min-width: 768px) {
+      body {
+        padding: 2.5rem;
+      }
+    }
+
+    /* Hardrlay (Reduhead) */
+    #sky-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: 
+        radial-gradient(circle at 88% 16%, rgba(253, 230, 138, 0.45) 0%, rgba(255, 255, 255, 0.15) 45%, rgba(255, 255, 255, 0) 100%),
+        linear-gradient(to bottom, #bcdffa 0%, #eef5fc 55%, #f3f7f0 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Transyer */
+    #nature-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Maort */
+    .app-viewport {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 64rem; /* 1024px, equivalent to max-w-5xl */
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      pointer-events: none;
+    }
+
+    /* Paper tiles */
+    .matte-tile {
+      background: rgba(251, 250, 245, 0.78);
+      backdrop-filter: blur(14px) saturate(110%);
+      -webkit-backdrop-filter: blur(14px) saturate(110%);
+      border: 1px solid rgba(188, 174, 145, 0.35);
+      border-radius: 1rem;
+      box-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 4px 20px -2px rgba(22, 34, 26, 0.03),
+        0 12px 40px -4px rgba(22, 34, 26, 0.06),
+        0 0 0 1px rgba(22, 34, 26, 0.02);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .matte-tile:hover {
+      border-color: rgba(188, 174, 145, 0.6);
+      box-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.8) inset,
+        0 6px 24px -2px rgba(22, 34, 26, 0.05),
+        0 16px 48px -4px rgba(22, 34, 26, 0.09),
+        0 0 0 1px rgba(22, 34, 26, 0.03);
+    }
+
+    .interactive {
+      pointer-events: auto;
+    }
+
+    /* Header Styling */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-radius: 0.75rem;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.375rem;
+      background-color: rgba(80, 120, 92, 0.08);
+      border: 1px solid rgba(80, 120, 92, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--meadow-sage);
+    }
+
+    .logo-icon svg {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+
+    .logo-text {
+      font-family: var(--font-caps);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .badge {
+      font-family: var(--font-caps);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background-color: rgba(22, 34, 26, 0.05);
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      border: 1px solid rgba(22, 34, 26, 0.08);
+      letter-spacing: 0.05em;
+    }
+
+    /* Mame */
+    .main-deck {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .slides-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      width: 100%;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      gap: 1.25rem;
+      padding-left: 12vw;
+      padding-right: 12vw;
+    }
+
+    .slides-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .slides-track {
+        padding-left: 16vw;
+        padding-right: 16vw;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .slides-track {
+        padding-left: 20vw;
+        padding-right: 20vw;
+      }
+    }
+
+    /* Slide Cards - Refined Layout with Edge Peeking */
+    .slide-card {
+      scroll-snap-align: center;
+      flex-shrink: 0;
+      width: 76vw; /* Reduced from 82vw to make the neighboring cards peek in more! */
+      max-width: 35rem; /* 560px */
+      padding: 1.5rem;
+      border-radius: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 300px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(251, 250, 245, 0.78);
+      backdrop-filter: blur(14px) saturate(110%);
+      -webkit-backdrop-filter: blur(14px) saturate(110%);
+    }
+
+    @media (min-width: 640px) {
+      .slide-card {
+        width: 68vw;
+        padding: 2.25rem;
+        min-height: 360px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .slide-card {
+        width: 58vw;
+      }
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      align-items: center;
+      user-select: text;
+    }
+
+    @media (min-width: 768px) {
+      .card-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+      }
+      .card-text-col {
+        grid-column: span 8 / span 8;
+      }
+      .card-visual-col {
+        grid-column: span 4 / span 4;
+        display: flex;
+        justify-content: center;
+        padding: 0.5rem 0;
+      }
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.18rem 0.625rem;
+      border-radius: 0.25rem;
+      background-color: #f1ede1;
+      border: 1px solid var(--earth-border);
+      font-family: var(--font-caps);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    .slide-title {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(1.4rem, 4.5vw, 1.875rem);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.625rem;
+      color: #111827;
+      line-height: 1.2;
+    }
+
+    .slide-description {
+      font-size: clamp(0.78rem, 2.5vw, 0.875rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .card-visual-col svg {
+      width: 4rem;
+      height: 4rem;
+      color: rgba(80, 120, 92, 0.35);
+    }
+
+    .card-footer {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(22, 34, 26, 0.4);
+      font-family: monospace;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(22, 34, 26, 0.08);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Buttons with Springy Elastic Transforms */
+    .nature-btn {
+      background-color: rgba(244, 239, 226, 0.85);
+      border: 1px solid var(--earth-border);
+      color: var(--text-main);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0.65rem 1.15rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+    }
+
+    .nature-btn:hover {
+      background-color: rgba(234, 227, 204, 0.95);
+      border-color: #928368;
+      transform: translateY(-1.5px);
+    }
+
+    .nature-btn:active {
+      background-color: #baa37e;
+      transform: translateY(0.5px) scale(0.97);
+    }
+
+    /* Footer Controls */
+    .app-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-radius: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .app-footer {
+        flex-direction: row;
+        gap: 1rem;
+      }
+    }
+
+    .stepper-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      width: 100%;
+    }
+
+    @media (min-width: 640px) {
+      .stepper-buttons {
+        width: auto;
+      }
+    }
+
+    .stepper-buttons .nature-btn {
+      flex-grow: 1;
+    }
+
+    @media (min-width: 640px) {
+      .stepper-buttons .nature-btn {
+        flex-grow: 0;
+      }
+    }
+
+    /* Dot Navigation with Large 44px Hit Target area */
+    .dot-navigation {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+    }
+
+    .nature-dot {
+      position: relative;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--earth-border);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nature-dot::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 44px;
+      height: 44px;
+      transform: translate(-50%, -50%);
+      background: transparent;
+    }
+
+    .nature-dot.active {
+      background-color: var(--meadow-sage);
+      transform: scale(1.3);
+      box-shadow: 0 0 0 4px rgba(80, 120, 92, 0.2);
+    }
+
+    /* Floating Swipe Hint Capsule */
+    .swipe-hint {
+      position: absolute;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(251, 250, 245, 0.88);
+      backdrop-filter: blur(10px) saturate(110%);
+      -webkit-backdrop-filter: blur(10px) saturate(110%);
+      border: 1px solid var(--earth-border);
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: var(--font-caps);
+      color: var(--text-muted);
+      box-shadow: 
+        0 2px 8px rgba(22, 34, 26, 0.03),
+        0 8px 24px rgba(22, 34, 26, 0.06);
+      z-index: 25;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .swipe-hint.hidden {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+    }
+
+    .swipe-arrow {
+      display: flex;
+      align-items: center;
+      animation: horizontal-bounce 1.6s infinite ease-in-out;
+      color: var(--meadow-sage);
+    }
+
+    @keyframes horizontal-bounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(4px); }
+    }
+
+    /* About Section */
+    .about-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .about-section {
+        padding: 2.25rem;
+      }
+    }
+
+    .section-header {
+      border-bottom: 1px solid rgba(22, 34, 26, 0.08);
+      padding-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-family: var(--font-caps);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .section-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 0.125rem;
+    }
+
+    .about-columns {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      font-size: clamp(0.78rem, 2.5vw, 0.875rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: text;
+    }
+
+    @media (min-width: 768px) {
+      .about-columns {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .about-columns p:not(:last-child) {
+      margin-bottom: 0.75rem;
+    }
+
+    .about-columns strong {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* Clean Empty Placeholders Grid to Reduce Bloat */
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .social-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .social-card {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .social-card-header {
+      border-bottom: 1px solid rgba(22, 34, 26, 0.08);
+      padding-bottom: 0.5rem;
+    }
+
+    .social-card-title {
+      font-family: var(--font-caps);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .social-card-title svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .instagram-icon {
+      color: #9d174d; /* rose-800 */
+    }
+
+    .tiktok-icon {
+      color: #115e59; /* cyan-800 */
+    }
+
+    .social-card-subtitle {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 0.125rem;
+    }
+
+    .embed-container {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 240px; /* Reduced container height to prevent screen bloating */
+      background: rgba(244, 239, 226, 0.25);
+      border: 1px dashed var(--earth-border);
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .placeholder-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .placeholder-inner svg {
+      width: 2.25rem;
+      height: 2.25rem;
+      color: rgba(22, 34, 26, 0.2);
+    }
+
+    .placeholder-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .placeholder-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      max-w: 16rem;
+      line-height: 1.5;
+    }
+
+    /* ==================== ZEN SANDBOX MODE STYLES ==================== */
+    .app-header,
+    .main-deck,
+    .app-footer,
+    .about-section,
+    .social-grid {
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.zen-mode .app-header,
+    body.zen-mode .main-deck,
+    body.zen-mode .app-footer,
+    body.zen-mode .about-section,
+    body.zen-mode .social-grid {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96) translateY(18px);
+    }
+
+    .zen-toggle-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 1rem;
+      margin-bottom: 2.5rem;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Fixed floating state when sandbox mode is active */
+    body.zen-mode .zen-toggle-container {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      z-index: 999;
+      width: auto;
+    }
+
+    .zen-btn {
+      background: rgba(251, 250, 245, 0.78);
+      backdrop-filter: blur(12px) saturate(115%);
+      -webkit-backdrop-filter: blur(12px) saturate(115%);
+      border: 1px solid var(--earth-border);
+      color: var(--text-muted);
+      font-family: var(--font-caps);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      pointer-events: auto; /* Override .app-viewport pointer-events: none so button is fully interactive */
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 
+        0 2px 8px rgba(22, 34, 26, 0.03),
+        0 8px 24px rgba(22, 34, 26, 0.06);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .zen-btn svg {
+      color: var(--meadow-sage);
+      transition: transform 0.3s ease;
+    }
+
+    .zen-btn:hover {
+      color: var(--text-dark);
+      background: #fbfaf5;
+      border-color: #baa37e;
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 
+        0 4px 12px rgba(22, 34, 26, 0.05),
+        0 12px 32px rgba(22, 34, 26, 0.1);
+    }
+
+    .zen-btn:hover svg {
+      transform: rotate(15deg);
+    }
+
+    .zen-btn:active {
+      transform: translateY(0.5px) scale(0.97);
+    }
+
+    body.zen-mode .zen-btn {
+      border-color: var(--meadow-sage);
+      color: var(--text-dark);
+      background: rgba(235, 239, 230, 0.88); /* Meadow sage translucent background */
+      box-shadow: 
+        0 4px 16px rgba(80, 120, 92, 0.1),
+        0 12px 32px rgba(22, 34, 26, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sky Atmosr) -->
+  <div id="sky-background"></div>
+
+  <!-- Interacanvas -->
+  <canvas id="nature-canvas"></canvas>
+
+  <!-- Scame -->
+  <div class="app-viewport">
+    
+    <!-- Toock -->
+    <header class="app-header interactive matte-tile">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+        </div>
+        <span class="logo-text">___________________________________</span>
+      </div>
+      <span class="badge" id="slide-index-counter">1 of 6</span>
+    </header>
+
+    <!-- Main Deck Frame & Slides Track -->
+    <main class="main-deck interactive">
+      <!-- Floating Swipe Hint Capsule -->
+      <div id="swipe-hint" class="swipe-hint">
+        <span>Swipe to read</span>
+        <div class="swipe-arrow">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="slides-track" id="slide-track">
+        
+        <!-- ==================== EDITABLE SLIDE 1 ==================== -->
+        <div class="slide-card matte-tile" data-index="0">
+          <div class="card-grid">
+            <div class="card-text-col">
+              <div class="category-badge">Purpose...</div>
+              <h2 class="slide-title">What's the big idea?</h2>
+              <p class="slide-description">
+                I'm leaving this space blank so I can fill it in later with input from team
+              </p>
+            </div>
+            
+            <div class="card-visual-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 18l-5-6-5 6" />
+                <path d="M12 2l8 10H4z" />
+                <path d="M12 2v20" />
+                <circle cx="12" cy="7" r="1.5" fill="currentColor" fill-opacity="0.25" />
+                <path d="M9 22h6" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <span>for all!</span>
+            <span>Index 01</span>
+          </div>
+        </div>
+        <!-- ==================== END SLIDE 1 ==================== -->
+
+        <!-- ==================== EDITABLE SLIDE 2 ==================== -->
+        <div class="slide-card matte-tile" data-index="1">
+          <div class="card-grid">
+            <div class="card-text-col">
+              <div class="category-badge">Transit</div>
+              <h2 class="slide-title">How can I get there?</h2>
+              <p class="slide-description">
+                I'm leaving this space blank AS WELL so I can fill it in later with input from team
+              </p>
+            </div>
+            
+            <div class="card-visual-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="5.5" cy="16" r="3.5" />
+                <circle cx="18.5" cy="16" r="3.5" />
+                <path d="M5.5 16l4.5-6.5h6l2.5 6.5" />
+                <path d="M10 9.5l2-4h3" />
+                <circle cx="12" cy="16" r="1.5" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <span>now you don't have any excuses!'</span>
+            <span>Index 02</span>
+          </div>
+        </div>
+        <!-- ==================== END SLIDE 2 ==================== -->
+
+        <!-- ==================== EDITABLE SLIDE 3 ==================== -->
+        <div class="slide-card matte-tile" data-index="2">
+          <div class="card-grid">
+            <div class="card-text-col">
+              <div class="category-badge">Activity</div>
+              <h2 class="slide-title">What do I do there?</h2>
+              <p class="slide-description">
+               I'm leaving this other space blank too, so I can fill it in later with input from team, also, as well, 
+              </p>
+            </div>
+            
+            <div class="card-visual-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 13c3-3 17-3 20 0-3 3-17 3-20 0z" />
+                <path d="M6 17l12-10" />
+                <path d="M5 8l2 2" />
+                <path d="M17 14l2 2" />
+                <circle cx="12" cy="7" r="1" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <span>boogie time.</span>
+            <span>Index 03</span>
+          </div>
+        </div>
+        <!-- ==================== END SLIDE 3 ==================== -->
+
+        <!-- ==================== EDITABLE SLIDE 4 ==================== -->
+        <div class="slide-card matte-tile" data-index="3">
+          <div class="card-grid">
+            <div class="card-text-col">
+              <div class="category-badge">Justification</div>
+              <h2 class="slide-title">Why would I want this?</h2>
+              <p class="slide-description">
+               Because we do lol
+              </p>
+            </div>
+            
+            <div class="card-visual-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 20L12 4l10 16H2z" />
+                <path d="M12 4v16" />
+                <path d="M7 20l5-8 5 8" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <span>join the party.</span>
+            <span>Index 04</span>
+          </div>
+        </div>
+        <!-- ==================== END SLIDE 4 ==================== -->
+
+        <!-- ==================== EDITABLE SLIDE 5 ==================== -->
+        <div class="slide-card matte-tile" data-index="4">
+          <div class="card-grid">
+            <div class="card-text-col">
+              <div class="category-badge">Orn</div>
+              <h2 class="slide-title">Bleck</h2>
+              <p class="slide-description">
+                BLEH FILLER TEXT FILLER TEXXXXXXXXXXXXXXXT
+              </p>
+            </div>
+            
+            <div class="card-visual-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 6l2 6-2 6-2-6z" fill="currentColor" fill-opacity="0.15" />
+                <path d="M12 3v2" />
+                <path d="M12 19v2" />
+                <path d="M3 12h2" />
+                <path d="M19 12h2" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <span>Aziyer</span>
+            <span>Index 05</span>
+          </div>
+        </div>
+        <!-- ==================== END SLIDE 5 ==================== -->
+
+        <!-- ==================== EDITABLE SLIDE 6 ==================== -->
+        <div class="slide-card matte-tile" data-index="5">
+          <div class="card-grid">
+            <div class="card-text-col">
+              <div class="category-badge">Preservation</div>
+              <h2 class="slide-title">Gibberish noise</h2>
+              <p class="slide-description">
+                Yada yada blah blah. Et cetera et cetera. Meh meh blah yada. Ending struc
+              </p>
+            </div>
+            
+            <div class="card-visual-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3L6 11h12z" />
+                <path d="M12 8l-8 9h16z" />
+                <path d="M12 17v4" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <span>Bio-matrix validation</span>
+            <span>Index 06</span>
+          </div>
+        </div>
+        <!-- ==================== END SLIDE 6 ==================== -->
+
+      </div>
+    </main>
+
+    <!-- Slide Deck Controls -->
+    <footer class="app-footer interactive matte-tile">
+      <!-- Stepper buttons -->
+      <div class="stepper-buttons">
+        <button id="prev-btn" class="nature-btn">
+          <svg fill="none" stroke="currentColor" width="14" height="14" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Previous
+        </button>
+        <button id="next-btn" class="nature-btn">
+          Next
+          <svg fill="none" stroke="currentColor" width="14" height="14" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Dot Navigation (Large Tap Targets) -->
+      <div class="dot-navigation">
+        <div class="nature-dot active" data-index="0" title="Slide 1"></div>
+        <div class="nature-dot" data-index="1" title="Slide 2"></div>
+        <div class="nature-dot" data-index="2" title="Slide 3"></div>
+        <div class="nature-dot" data-index="3" title="Slide 4"></div>
+        <div class="nature-dot" data-index="4" title="Slide 5"></div>
+        <div class="nature-dot" data-index="5" title="Slide 6"></div>
+      </div>
+    </footer>
+
+    <!-- ==================== EDITABLE PROJECT WRITEUP SECTION ==================== -->
+    <section class="about-section interactive matte-tile">
+      <div class="section-header">
+        <h2 class="section-title">About the project</h2>
+        <p class="section-subtitle">Comprehensive background framework and functional targets</p>
+      </div>
+      <div class="about-columns">
+        <div>
+          <p>
+            Welcome to the official deployment space of <strong>wallowa rec BS website thing ding dong ting tong the strong bong redone balloon tune.</strong>. This ecitment to prsign constural d
+          </p>
+          <p>
+            By coups, our engvements. Herpes and watch real-time simulations rodules.
+          </p>
+        </div>
+        <div>
+          <p>
+            Every lams, from mys. Repructure to reprves.
+          </p>
+          <p>
+            Our futuions aiems.
+          </p>
+        </div>
+      </div>
+    </section>
+    <!-- ==================== END PROJECT WRITEUP SECTION ==================== -->
+
+    <!-- ==================== EDITABLE SOCIAL EMBEDS GRID ==================== -->
+    <section class="social-grid interactive">
+      
+      <!-- Instagram Embed Pane -->
+      <div class="social-card matte-tile">
+        <div class="social-card-header">
+          <h3 class="social-card-title">
+            <svg class="instagram-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+            Instagram!
+          </h3>
+          <p class="social-card-subtitle">View our socials!</p>
+        </div>
+        
+        <div class="embed-container">
+          <div class="placeholder-inner">
+            <svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="placeholder-title">Ready for Instagram embed</span>
+            <span class="placeholder-desc">Go into the HTML source file and replace this container with generated Instagram iframe embedding script</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TikTok Embed Pane -->
+      <div class="social-card matte-tile">
+        <div class="social-card-header">
+          <h3 class="social-card-title">
+            <svg class="tiktok-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
+            </svg>
+            TikTok!
+          </h3>
+          <p class="social-card-subtitle">View our... other socials!</p>
+        </div>
+
+        <div class="embed-container">
+          <div class="placeholder-inner">
+            <svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="placeholder-title">Ready for TikTok embed</span>
+            <span class="placeholder-desc">Go into the HTML source file and replace this container with generated TikTok block embed code snippet</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+    <!-- ==================== END SOCIAL EMBEDS GRID ==================== -->
+
+    <!-- Zen Sandbox Mode Toggle -->
+    <div class="zen-toggle-container">
+      <button id="zen-toggle-btn" class="zen-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="12" height="12">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Play with the background?
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Application Engine Core & Slideshow Controllers ---
+    const totalSlidesCount = 6;
+    let activeSlideIndex = 0;
+
+    // Navigation and Swipe Hint tracking states
+    let isProgrammaticScroll = false;
+    let programmaticScrollTimeout = null;
+
+    // Movement velocity variables to pass scrolling physics into environmental canvas
+    let scrollForce = 0;
+    let lastScrollLeftValue = 0;
+
+    const track = document.getElementById('slide-track');
+    const cards = document.querySelectorAll('.slides-track > .slide-card');
+    const dots = document.querySelectorAll('.nature-dot');
+    const indexCounter = document.getElementById('slide-index-counter');
+
+    // Smooth scroll interpolation logic
+    // Smooth scroll interpolation logic with edge fade & blur
+    function updateSlideScales() {
+      const trackRect = track.getBoundingClientRect();
+      const trackCenter = trackRect.left + trackRect.width / 2;
+
+      cards.forEach((card) => {
+        const cardRect = card.getBoundingClientRect();
+        const cardCenter = cardRect.left + cardRect.width / 2;
+        
+        const distance = Math.abs(cardCenter - trackCenter);
+        // Max distance is 65% of the viewport width (letting adjacent cards peek in with soft blur/opacity)
+        const maxDistance = trackRect.width * 0.65;
+        
+        const ratio = Math.min(distance / maxDistance, 1);
+        
+        // Compute beautiful linear interpolation scales
+        const scale = 1.025 - (ratio * 0.125); // Scales from 1.025 down to 0.9
+        
+        // Quadratic ease-out opacity: dissolves completely into background at the edge
+        const opacity = 1.0 - ratio * ratio; 
+        
+        // Progressive Gaussian blur: 0px at center, up to 12px at either side
+        const blurAmount = ratio * 12; 
+        
+        card.style.transform = `scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.filter = blurAmount > 0.15 ? `blur(${blurAmount}px)` : 'none';
+      });
+    }
+
+    function syncActiveSlideMetrics(index) {
+      activeSlideIndex = index;
+
+      dots.forEach((dot, idx) => {
+        if (idx === index) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+
+      indexCounter.textContent = `${index + 1} of ${totalSlidesCount}`;
+      updateSlideScales();
+    }
+
+    const swipeHint = document.getElementById('swipe-hint');
+    function hideSwipeHint() {
+      if (swipeHint && !swipeHint.classList.contains('hidden')) {
+        swipeHint.classList.add('hidden');
+      }
+    }
+
+    track.addEventListener('scroll', () => {
+      const position = track.scrollLeft;
+      const slideWidth = track.scrollWidth / totalSlidesCount;
+      const calculatedIndex = Math.min(
+        Math.max(Math.round(position / slideWidth), 0),
+        totalSlidesCount - 1
+      );
+
+      const delta = position - lastScrollLeftValue;
+      scrollForce += delta * 0.05;
+      lastScrollLeftValue = position;
+
+      // Update slide scales on every scroll tick for a fluid desktop/mobile feel
+      updateSlideScales();
+      hideSwipeHint(); // Dismiss swipe-to-explore indicator on manual interaction
+
+      if (calculatedIndex !== activeSlideIndex) {
+        syncActiveSlideMetrics(calculatedIndex);
+      }
+    });
+
+    function navigateTo(index) {
+      if (programmaticScrollTimeout) {
+        clearTimeout(programmaticScrollTimeout);
+      }
+      isProgrammaticScroll = true;
+      track.style.scrollSnapType = 'none'; // Temporarily turn off scroll-snap during active programmatic navigation to prevent locks
+      
+      programmaticScrollTimeout = setTimeout(() => {
+        track.style.scrollSnapType = 'x mandatory'; // Restore scroll-snap
+        isProgrammaticScroll = false;
+      }, 650);
+
+      const slideWidth = track.scrollWidth / totalSlidesCount;
+      track.scrollTo({
+        left: index * slideWidth,
+        behavior: 'smooth'
+      });
+      syncActiveSlideMetrics(index);
+      hideSwipeHint(); // Dismiss hint on direct navigation click
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+      navigateTo((activeSlideIndex + 1) % totalSlidesCount);
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', () => {
+      navigateTo((activeSlideIndex - 1 + totalSlidesCount) % totalSlidesCount);
+    });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => navigateTo(index));
+    });
+
+    // Handle viewport stabilization delay with a dynamic startup nudge animation
+    setTimeout(() => {
+      navigateTo(0);
+      updateSlideScales();
+      
+      // Gentle horizontal micro-nudge after loading to visually demonstrate the scrollable slide-track
+      setTimeout(() => {
+        isProgrammaticScroll = true;
+        track.style.scrollSnapType = 'none'; // Turn off scroll-snap during nudge animation so browser does not fight non-snap coordinates
+        
+        if (programmaticScrollTimeout) clearTimeout(programmaticScrollTimeout);
+        programmaticScrollTimeout = setTimeout(() => { isProgrammaticScroll = false; }, 1600); // covers entire nudge lifecycle
+
+        track.scrollTo({
+          left: 55, // Smooth nudge to 55px
+          behavior: 'smooth'
+        });
+        
+        // Settle smoothly back to the active slide center after 700ms (gives user plenty of time to absorb the visual shift)
+        setTimeout(() => {
+          track.scrollTo({
+            left: 0,
+            behavior: 'smooth'
+          });
+          
+          // Re-enable snapping after the track has fully settled back to index 0
+          setTimeout(() => {
+            track.style.scrollSnapType = 'x mandatory';
+          }, 500);
+        }, 700);
+      }, 850);
+    }, 150);
+
+    // --- Zen Sandbox Mode Controller ---
+    const zenToggleBtn = document.getElementById('zen-toggle-btn');
+    let isZenMode = false;
+
+    zenToggleBtn.addEventListener('click', () => {
+      isZenMode = !isZenMode;
+      console.log('Zen Sandbox Mode Toggle:', isZenMode);
+      document.body.classList.toggle('zen-mode', isZenMode);
+      
+      if (isZenMode) {
+        zenToggleBtn.innerHTML = `
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="12" height="12">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+          </svg>
+          Show interface
+        `;
+      } else {
+        zenToggleBtn.innerHTML = `
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="12" height="12">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Play with the background?
+        `;
+      }
+    });
+
+
+    // --- High-Performance Procedural Park Environment Simulation ---
+    const canvas = document.getElementById('nature-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // DPR Scaling Implementation for Retina / High-DPI Sharpness
+    let dpr = window.devicePixelRatio || 1;
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+    
+    canvas.width = canvasWidth * dpr;
+    canvas.height = canvasHeight * dpr;
+    ctx.scale(dpr, dpr);
+
+    window.addEventListener('resize', () => {
+      dpr = window.devicePixelRatio || 1;
+      canvasWidth = window.innerWidth;
+      canvasHeight = window.innerHeight;
+      
+      canvas.width = canvasWidth * dpr;
+      canvas.height = canvasHeight * dpr;
+      ctx.scale(dpr, dpr);
+      
+      scaleFactor = canvasHeight / 720;
+      initializeMeadowSystem();
+      updateSlideScales();
+    });
+
+    let scaleFactor = canvasHeight / 720;
+
+    const windBaseSpeed = 2.8;
+
+    const pointer = { x: -3000, y: -3000, active: false };
+    window.addEventListener('mousemove', (e) => {
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.active = true;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      pointer.active = false;
+    });
+
+    // 1. Natural Golden Pollen Particles
+    class PollenParticle {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * canvasHeight;
+      }
+
+      reset() {
+        this.x = -15 - Math.random() * 120;
+        this.y = Math.random() * canvasHeight;
+        this.radius = (1.5 + Math.random() * 2) * scaleFactor;
+        this.mass = 0.04 + Math.random() * 0.1;
+        this.frequency = 0.005 + Math.random() * 0.008;
+        this.angle = Math.random() * Math.PI * 2;
+        this.opacity = 0.15 + Math.random() * 0.35;
+      }
+
+      update() {
+        this.x += (windBaseSpeed * 0.38) + (scrollForce * 0.12);
+        this.y += Math.sin(this.angle) * 0.12 + this.mass * 0.15;
+        this.angle += this.frequency;
+
+        if (pointer.active) {
+          const dx = this.x - pointer.x;
+          const dy = this.y - pointer.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 130) {
+            const push = (130 - distance) / 130;
+            this.x += (dx / distance) * push * 3.5;
+            this.y += (dy / distance) * push * 3.5;
+          }
+        }
+
+        if (this.x > canvasWidth + 20) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(225, 180, 105, ${this.opacity})`;
+        ctx.fill();
+      }
+    }
+
+    // 2. Subtle, Dense Multi-depth Swaying Grass Blades
+    class GrassBlade {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvasWidth;
+        this.height = (90 + Math.random() * 120) * scaleFactor;
+        this.width = (3 + Math.random() * 3.5) * scaleFactor;
+        this.swayAmplitude = (18 + Math.random() * 20) * scaleFactor;
+        this.swaySpeed = 0.007 + Math.random() * 0.007;
+        this.phaseOffset = Math.random() * Math.PI * 2;
+
+        this.colorGradient = ctx.createLinearGradient(0, 0, 0, -this.height);
+        const randTone = Math.random();
+        
+        // Slightly darker tones to ensure rich background depth & visual separation
+        if (randTone < 0.68) {
+          this.colorGradient.addColorStop(0, 'rgba(28, 48, 26, 0.4)'); 
+          this.colorGradient.addColorStop(0.65, 'rgba(45, 76, 42, 0.35)'); 
+          this.colorGradient.addColorStop(1, 'rgba(80, 120, 92, 0.25)'); 
+        } else if (randTone < 0.9) {
+          this.colorGradient.addColorStop(0, 'rgba(16, 38, 14, 0.4)'); 
+          this.colorGradient.addColorStop(0.5, 'rgba(38, 68, 32, 0.35)'); 
+          this.colorGradient.addColorStop(1, 'rgba(110, 145, 90, 0.25)'); 
+        } else {
+          this.colorGradient.addColorStop(0, 'rgba(44, 46, 21, 0.4)'); 
+          this.colorGradient.addColorStop(0.5, 'rgba(86, 83, 37, 0.35)'); 
+          this.colorGradient.addColorStop(1, 'rgba(175, 150, 75, 0.25)'); 
+        }
+      }
+
+      draw() {
+        const windSway = Math.sin((Date.now() * this.swaySpeed) + this.phaseOffset) * this.swayAmplitude * (windBaseSpeed * 0.12);
+        let externalImpulse = scrollForce * 0.38;
+
+        if (pointer.active) {
+          const distance = Math.abs(this.x - pointer.x);
+          if (distance < 120 && pointer.y > canvasHeight - this.height) {
+            const influence = (120 - distance) / 120;
+            const pushDir = this.x > pointer.x ? 1 : -1;
+            externalImpulse += pushDir * influence * 45 * scaleFactor;
+          }
+        }
+
+        const totalSway = windSway + externalImpulse;
+
+        ctx.save();
+        ctx.translate(this.x, canvasHeight);
+
+        ctx.beginPath();
+        ctx.moveTo(-this.width / 2, 0);
+        ctx.quadraticCurveTo(
+          -this.width / 2, -this.height * 0.48, 
+          totalSway, -this.height
+        );
+        ctx.quadraticCurveTo(
+          this.width / 2, -this.height * 0.48, 
+          this.width / 2, 0
+        );
+        ctx.closePath();
+
+        ctx.fillStyle = this.colorGradient;
+        ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    // 3. Subtle, High-Performance Offscreen Pre-rendered Wildflowers
+    class Wildflower {
+      constructor() {
+        this.x = Math.random() * canvasWidth;
+        this.height = (120 + Math.random() * 90) * scaleFactor;
+        this.swayAmplitude = (16 + Math.random() * 18) * scaleFactor;
+        this.swaySpeed = 0.006 + Math.random() * 0.003;
+        this.phaseOffset = Math.random() * Math.PI * 2;
+        
+        const isWhite = Math.random() < 0.55;
+        this.petalColor = isWhite ? 'rgba(250, 247, 238, 0.65)' : 'rgba(254, 240, 138, 0.6)';
+        this.centerColor = 'rgba(217, 119, 6, 0.7)';
+        this.petalCount = 6 + Math.floor(Math.random() * 2);
+        this.flowerRadius = (4.5 + Math.random() * 3) * scaleFactor;
+
+        // Perform Offscreen Pre-rendering to eliminate drawing individual ellipses on every single frame!
+        this.offscreenCanvas = document.createElement('canvas');
+        const size = Math.ceil(this.flowerRadius * 4.5);
+        this.offscreenCanvas.width = size;
+        this.offscreenCanvas.height = size;
+        const oCtx = this.offscreenCanvas.getContext('2d');
+
+        if (oCtx) {
+          oCtx.translate(size / 2, size / 2);
+          
+          // Draw Petals onto Cache Canvas
+          oCtx.fillStyle = this.petalColor;
+          for (let i = 0; i < this.petalCount; i++) {
+            const rotationAngle = (i / this.petalCount) * Math.PI * 2;
+            oCtx.save();
+            oCtx.rotate(rotationAngle);
+            oCtx.beginPath();
+            oCtx.ellipse(this.flowerRadius * 1.05, 0, this.flowerRadius * 0.72, this.flowerRadius * 0.35, 0, 0, Math.PI * 2);
+            oCtx.fill();
+            oCtx.restore();
+          }
+
+          // Draw Center bulb onto Cache Canvas
+          oCtx.beginPath();
+          oCtx.arc(0, 0, this.flowerRadius * 0.55, 0, Math.PI * 2);
+          oCtx.fillStyle = this.centerColor;
+          oCtx.fill();
+        }
+      }
+
+      draw() {
+        const windSway = Math.sin((Date.now() * this.swaySpeed) + this.phaseOffset) * this.swayAmplitude * (windBaseSpeed * 0.11);
+        let externalImpulse = scrollForce * 0.35;
+
+        if (pointer.active) {
+          const distance = Math.abs(this.x - pointer.x);
+          if (distance < 110 && pointer.y > canvasHeight - this.height) {
+            const influence = (110 - distance) / 110;
+            const pushDir = this.x > pointer.x ? 1 : -1;
+            externalImpulse += pushDir * influence * 40 * scaleFactor;
+          }
+        }
+
+        const totalSway = windSway + externalImpulse;
+
+        ctx.save();
+        ctx.translate(this.x, canvasHeight);
+
+        // Draw Stem
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(
+          totalSway * 0.35, -this.height * 0.5, 
+          totalSway, -this.height
+        );
+        ctx.strokeStyle = 'rgba(67, 90, 59, 0.45)';
+        ctx.lineWidth = 1.3 * scaleFactor;
+        ctx.stroke();
+
+        // Paint pre-rendered flower head in a single blit call!
+        ctx.drawImage(
+          this.offscreenCanvas,
+          totalSway - this.offscreenCanvas.width / 2,
+          -this.height - this.offscreenCanvas.height / 2
+        );
+
+        ctx.restore();
+      }
+    }
+
+    // 4. Deciduous Park Trees (Frames the background scenes on the canvas edges)
+    class ParkTree {
+      constructor(x, targetHeight, leafDensity) {
+        this.x = x;
+        this.targetHeight = targetHeight * scaleFactor;
+        this.leafDensity = leafDensity;
+        this.trunkWidth = (18 + Math.random() * 8) * scaleFactor;
+        this.swayAmplitude = (10 + Math.random() * 12) * scaleFactor;
+        this.swaySpeed = 0.004 + Math.random() * 0.003;
+        this.phaseOffset = Math.random() * Math.PI;
+        this.canopyShapes = [];
+
+        // Generate coordinates for organic, layered leaf canopies
+        for (let i = 0; i < this.leafDensity; i++) {
+          this.canopyShapes.push({
+            offsetX: (Math.random() - 0.5) * 110 * scaleFactor,
+            offsetY: -this.targetHeight + (Math.random() - 0.5) * 70 * scaleFactor,
+            radius: (45 + Math.random() * 45) * scaleFactor,
+            color: Math.random() < 0.5 ? 'rgba(80, 120, 92, 0.45)' : 'rgba(110, 145, 90, 0.35)'
+          });
+        }
+      }
+
+      draw() {
+        const windSway = Math.sin((Date.now() * this.swaySpeed) + this.phaseOffset) * this.swayAmplitude * (windBaseSpeed * 0.08);
+        const externalImpulse = scrollForce * 0.15;
+        const totalSway = windSway + externalImpulse;
+
+        ctx.save();
+        ctx.translate(this.x, canvasHeight);
+
+        // Draw trunk
+        ctx.beginPath();
+        ctx.moveTo(-this.trunkWidth / 2, 0);
+        ctx.quadraticCurveTo(
+          -this.trunkWidth / 3, -this.targetHeight * 0.6,
+          totalSway * 0.5, -this.targetHeight
+        );
+        ctx.lineTo(totalSway * 0.5 + this.trunkWidth * 0.4, -this.targetHeight);
+        ctx.quadraticCurveTo(
+          this.trunkWidth / 3, -this.targetHeight * 0.6,
+          this.trunkWidth / 2, 0
+        );
+        ctx.closePath();
+        
+        const barkGrad = ctx.createLinearGradient(-this.trunkWidth / 2, 0, this.trunkWidth / 2, 0);
+        barkGrad.addColorStop(0, 'rgba(86, 75, 59, 0.7)');
+        barkGrad.addColorStop(1, 'rgba(118, 102, 85, 0.5)');
+        ctx.fillStyle = barkGrad;
+        ctx.fill();
+
+        // Draw organic swaying canopy components
+        this.canopyShapes.forEach(leaf => {
+          ctx.save();
+          ctx.translate(totalSway, 0);
+          ctx.beginPath();
+          ctx.arc(leaf.offsetX, leaf.offsetY, leaf.radius, 0, Math.PI * 2);
+          ctx.fillStyle = leaf.color;
+          ctx.fill();
+          ctx.restore();
+        });
+
+        ctx.restore();
+      }
+    }
+
+    // 5. Flat Atmosphere Clouds
+    class AtmosphericCloud {
+      constructor() {
+        this.reset();
+        this.x = Math.random() * canvasWidth;
+      }
+
+      reset() {
+        this.x = -300 - Math.random() * 300;
+        this.y = 20 + Math.random() * (canvasHeight * 0.2);
+        this.size = (120 + Math.random() * 110) * scaleFactor;
+        this.speed = 0.08 + Math.random() * 0.14;
+        this.opacity = 0.12 + Math.random() * 0.15;
+      }
+
+      update() {
+        this.x += this.speed + (windBaseSpeed * 0.03) + (scrollForce * 0.01);
+        if (this.x > canvasWidth + 350) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size * 0.4, 0, Math.PI * 2);
+        ctx.arc(this.size * 0.26, -this.size * 0.08, this.size * 0.32, 0, Math.PI * 2);
+        ctx.arc(-this.size * 0.26, this.size * 0.04, this.size * 0.26, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    // Allocation metrics setup
+    let grassLayers = [];
+    let flowers = [];
+    let pollenField = [];
+    let clouds = [];
+    let backgroundTrees = [];
+
+    function initializeMeadowSystem() {
+      grassLayers = [];
+      flowers = [];
+      pollenField = [];
+      clouds = [];
+      backgroundTrees = [];
+
+      // Construct framing park trees
+      backgroundTrees.push(new ParkTree(canvasWidth * 0.08, 340, 8));
+      backgroundTrees.push(new ParkTree(canvasWidth * 0.18, 280, 6));
+      backgroundTrees.push(new ParkTree(canvasWidth * 0.82, 360, 9));
+      backgroundTrees.push(new ParkTree(canvasWidth * 0.92, 300, 7));
+
+      const bladeCount = Math.min(Math.floor(canvasWidth / 5.5), 220); // Optimized grass count
+      for (let i = 0; i < bladeCount; i++) {
+        grassLayers.push(new GrassBlade());
+      }
+      grassLayers.sort((a, b) => a.x - b.x);
+
+      const flowerCount = Math.min(Math.floor(canvasWidth / 35), 45);
+      for (let i = 0; i < flowerCount; i++) {
+        flowers.push(new Wildflower());
+      }
+
+      const pollenCount = Math.min(Math.floor(canvasWidth / 30), 55);
+      for (let i = 0; i < pollenCount; i++) {
+        pollenField.push(new PollenParticle());
+      }
+
+      const cloudCount = Math.min(Math.floor(canvasWidth / 350), 4);
+      for (let i = 0; i < cloudCount; i++) {
+        clouds.push(new AtmosphericCloud());
+      }
+    }
+
+    // Distant soft green park tree silhouettes
+    function drawDistantTreeSilhouettes() {
+      ctx.save();
+      const horizonY = canvasHeight * 0.88;
+      ctx.fillStyle = 'rgba(75, 105, 85, 0.25)';
+      ctx.beginPath();
+      ctx.moveTo(0, canvasHeight);
+      ctx.lineTo(0, horizonY);
+      
+      const segmentWidth = canvasWidth / 15;
+      for (let i = 0; i <= 15; i++) {
+        const x = i * segmentWidth;
+        const wave = Math.sin(x * 0.005) * 15 * scaleFactor;
+        const puff = Math.cos(x * 0.03) * 6 * scaleFactor;
+        ctx.lineTo(x, horizonY + wave + puff);
+      }
+      ctx.lineTo(canvasWidth, canvasHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Curved cobblestone gravel park pathway to break up abstract backgrounds
+    function drawParkPathway() {
+      ctx.save();
+      ctx.beginPath();
+      
+      const steps = 20;
+      const stepSize = canvasWidth / steps;
+      
+      // Upper profile boundary
+      ctx.moveTo(0, canvasHeight - 80 * scaleFactor);
+      for (let i = 0; i <= steps; i++) {
+        const x = i * stepSize;
+        const y = (canvasHeight - 90 * scaleFactor) + Math.sin(i * 0.12) * 55 * scaleFactor;
+        ctx.lineTo(x, y);
+      }
+      
+      // Lower profile boundary
+      for (let i = steps; i >= 0; i--) {
+        const x = i * stepSize;
+        const y = (canvasHeight - 40 * scaleFactor) + Math.sin(i * 0.12) * 55 * scaleFactor;
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.closePath();
+      
+      // Rich textured organic warm beige gravel fill
+      const pathGrad = ctx.createLinearGradient(0, canvasHeight - 90 * scaleFactor, 0, canvasHeight);
+      pathGrad.addColorStop(0, '#ebdcb8');
+      pathGrad.addColorStop(0.5, '#dfceab');
+      pathGrad.addColorStop(1, '#cbba95');
+      ctx.fillStyle = pathGrad;
+      ctx.fill();
+      
+      // Subtle textured gravel dotted shadows
+      ctx.strokeStyle = 'rgba(118, 102, 85, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 12]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Procedural Foreground Hills to cover the baseline grass stems (eliminates barcode effect)
+    function drawForegroundHills() {
+      const hillResolution = 16;
+      const step = canvasWidth / hillResolution;
+
+      // Layer 1: Back rolling hill (slightly darker, covers deep bases)
+      ctx.beginPath();
+      ctx.moveTo(0, canvasHeight);
+      for (let i = 0; i <= hillResolution; i++) {
+        const x = i * step;
+        const y = canvasHeight - 24 - Math.sin(x * 0.003 + (scrollForce * 0.005)) * 8;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(canvasWidth, canvasHeight);
+      ctx.closePath();
+      
+      const hillGrad1 = ctx.createLinearGradient(0, canvasHeight - 32, 0, canvasHeight);
+      hillGrad1.addColorStop(0, 'rgba(80, 110, 88, 0.7)');
+      hillGrad1.addColorStop(1, 'rgba(80, 110, 88, 0.95)');
+      ctx.fillStyle = hillGrad1;
+      ctx.fill();
+
+      // Layer 2: Front rolling hill (slightly warmer, sits forward)
+      ctx.beginPath();
+      ctx.moveTo(0, canvasHeight);
+      for (let i = 0; i <= hillResolution; i++) {
+        const x = i * step;
+        const y = canvasHeight - 14 - Math.cos(x * 0.0022 - (scrollForce * 0.003)) * 6;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(canvasWidth, canvasHeight);
+      ctx.closePath();
+
+      const hillGrad2 = ctx.createLinearGradient(0, canvasHeight - 20, 0, canvasHeight);
+      hillGrad2.addColorStop(0, 'rgba(110, 145, 90, 0.85)');
+      hillGrad2.addColorStop(1, 'rgba(110, 145, 90, 0.98)');
+      ctx.fillStyle = hillGrad2;
+      ctx.fill();
+    }
+
+    initializeMeadowSystem();
+
+    let solarRotationAngle = 0;
+
+    // Simulation loop
+    function render() {
+      // Clear transparently to reveal CSS Sky and Sun Corona Background
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Render simplified volumetric sun rays directly on canvas
+      const sunCenterX = canvasWidth * 0.88;
+      const sunCenterY = canvasHeight * 0.16;
+      const baseSolarRadius = Math.max(canvasWidth, canvasHeight) * 0.42;
+
+      ctx.save();
+      ctx.translate(sunCenterX, sunCenterY);
+      ctx.rotate(solarRotationAngle);
+      
+      const solarBeamCount = 10;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.012)';
+      for (let i = 0; i < solarBeamCount; i++) {
+        ctx.rotate((Math.PI * 2) / solarBeamCount);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-25, baseSolarRadius);
+        ctx.lineTo(25, baseSolarRadius);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+      solarRotationAngle += 0.0006;
+
+      // Render atmosphere clouds
+      clouds.forEach(cloud => {
+        cloud.update();
+        cloud.draw();
+      });
+
+      // Render distant silhouettes & pathway
+      drawDistantTreeSilhouettes();
+      drawParkPathway();
+
+      pollenField.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+
+      // Render framing park trees
+      backgroundTrees.forEach(tree => {
+        tree.draw();
+      });
+
+      // Render dense background flora layers
+      flowers.forEach(flower => {
+        flower.draw();
+      });
+
+      grassLayers.forEach(blade => {
+        blade.draw();
+      });
+
+      // Render cover hills directly on top of grass stems to eliminate barcodes
+      drawForegroundHills();
+
+      // Decay scroll kinetic friction forces
+      scrollForce *= 0.925;
+
+      requestAnimationFrame(render);
+    }
+
+    window.onload = function() {
+      render();
+    };
+  </script>
+</body>
+</html>
